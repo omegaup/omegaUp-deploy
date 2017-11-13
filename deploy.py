@@ -15,9 +15,15 @@ parser.add_argument('alias', nargs = 1)
 
 args = parser.parse_args()
 
+zipName = 'upload.zip'
+
 problem = Problem(args.alias[0])
-problem.prepareZip('upload.zip')
+problem.prepareZip(zipName)
 
 oUp = omegaUp(args.username, args.password)
 
 oUp.login()
+
+message = 'Deployed automatically from commit ' + env.get('TRAVIS_COMMIT', 'XXXXXX')
+
+os.remove(zipName)
