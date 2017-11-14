@@ -12,6 +12,7 @@ class Problem:
 
         self.path = path
         self.config = yaml.load(config)
+        self.disabled = self.config.get('disabled', False)
 
     def prepareZip(self, zipPath):
         ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
@@ -27,7 +28,7 @@ class Problem:
                     sol = subprocess.call('./solution',
                                           stdin = in_file,
                                           stdout = out_file,
-                                          timeout = self.config['timeout'])
+                                          timeout = self.config.get('timeout', 1))
 
                 outs.append(f_out)
 
@@ -46,4 +47,3 @@ class Problem:
             for case in ins + outs:
                 _, name = os.path.split(case)
                 archive.write(case, os.path.join('cases', name))
-

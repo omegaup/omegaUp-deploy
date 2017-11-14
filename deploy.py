@@ -43,6 +43,11 @@ if args.onlychanges:
 zipName = 'upload.zip'
 
 problem = Problem(path)
+
+if problem.disabled:
+    print("Problem upload disabled.")
+    sys.exit(0)
+
 problem.prepareZip(zipName)
 
 oUp = omegaUp(args.username, args.password)

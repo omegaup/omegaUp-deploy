@@ -38,6 +38,17 @@ class omegaUp:
             'message': message,
         }
 
+        payload.update(problem.config.get('params', {}))
+
+        languages = payload.get('languages', '')
+
+        if languages == 'all':
+            payload['languages'] = 'c,cpp,cpp11,cs,hs,java,pas,py,rb,lua'
+        elif languages == 'karel':
+            payload['languages'] = 'kp,kj'
+
+        print(payload)
+
         files = { 'problem_contents': open(zipPath, 'rb') }
 
         return self.query("POST", "/api/problem/update", payload, files)
