@@ -1,5 +1,8 @@
 alias: dummy-problem
 
+# optional argument, if false, the problem won't be deployed
+# disabled: true
+
 # if true, ignores the .outs and uses the solution
 # to generate them from the .ins
 generate-output: true
@@ -12,8 +15,8 @@ create: true
 
 # all of these are optional unless create is set to true
 params:
-  title: Comida Fría
-  source: Curso OMI (Orac)
+  title: Problem Title
+  source: Problem Source
 
   visibility: 1
 
