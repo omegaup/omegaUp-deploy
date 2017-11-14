@@ -14,7 +14,13 @@ timeout: 0.5
 # default true
 # create: false
 
-# all of these are optional unless create is set to true
+# optional: upload the required files for interactive problems
+# default false
+# conflicts with generate-output:
+#     generate-output must be false if interactive is true
+# interactive: true
+
+# all of these are required unless create is set to false
 params:
   title: Problem Title
   source: Problem Source
