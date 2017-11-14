@@ -15,7 +15,11 @@ class omegaUp:
         else:
             raise Exception(method)
 
-        response = r.json()
+        try:
+            response = r.json()
+        except Exception:
+            print(r.text)
+            raise
 
         if not canFail and response['status'] != 'ok':
             raise Exception(response)
