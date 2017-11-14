@@ -22,10 +22,8 @@ path = args.path[0]
 problemPath, problemDir = os.path.split(path)
 
 if args.onlychanges:
-    print(env['TRAVIS_COMMIT_RANGE'])
-
     git = subprocess.Popen(
-        ["git", "diff", "--name-only", "--diff-filter=AMDR", "--cached", "HEAD^"],
+        ["git", "diff", "--name-only", "--diff-filter=AMDR", env['TRAVIS_COMMIT_RANGE']],
         stdout = subprocess.PIPE,
         cwd = problemPath)
 
