@@ -19,12 +19,13 @@ parser.add_argument('path', nargs = 1)
 args = parser.parse_args()
 
 path = args.path[0]
-_, problemDir = os.path.split(path)
+problemPath, problemDir = os.path.split(path)
 
 if args.onlychanges:
     git = subprocess.Popen(
         ["git", "diff", "--name-only", "--diff-filter=AMDR", "--cached", "HEAD^"],
-        stdout = subprocess.PIPE)
+        stdout = subprocess.PIPE,
+        cwd = problemPath)
 
     grep = subprocess.Popen(["grep", problemDir], stdin = git.stdout, stdout = subprocess.PIPE)
     wc = subprocess.Popen(["wc", "-l"], stdin = grep.stdout, stdout = subprocess.PIPE)
