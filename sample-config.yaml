@@ -10,8 +10,9 @@ solution: solution/solution.cpp
 # timeout for .out generator per .in
 timeout: 0.5
 
-# create the problem if it isn't already in omegaUp
-create: true
+# optional: create the problem if it isn't already in omegaUp
+# default true
+# create: false
 
 # all of these are optional unless create is set to true
 params:

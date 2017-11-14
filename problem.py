@@ -13,6 +13,8 @@ class Problem:
         self.path = path
         self.config = yaml.load(config)
         self.disabled = self.config.get('disabled', False)
+        self.create = self.config.get('create', False)
+        self.alias = self.config['alias']
 
     def prepareZip(self, zipPath):
         ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]

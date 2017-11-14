@@ -4,7 +4,7 @@ class omegaUp:
     url = "https://omegaup.com"
     auth_token = None
 
-    def query(self, method, endpoint, payload = {}, files = None):
+    def query(self, method, endpoint, payload = {}, files = None, canFail = False):
         if self.auth_token is not None:
             payload['auth_token'] = self.auth_token
 
@@ -17,7 +17,7 @@ class omegaUp:
 
         response = r.json()
 
-        if response['status'] != 'ok':
+        if not canFail and response['status'] != 'ok':
             raise Exception(response)
 
         return response
@@ -32,11 +32,33 @@ class omegaUp:
     def session(self):
         return self.query("GET", "/api/session/currentsession")
 
+    def isProblemAdmin(self, alias):
+        payload = { 'problem_alias': alias }
+        response = self.query("GET", "/api/problem/stats", payload, canFail = True)
+        return response['status'] == 'ok'
+
+    def problemExists(self, alias):
+        payload = { 'problem_alias': alias }
+        response = self.query("GET", "/api/problem/details", payload, canFail = True)
+        return response['status'] == 'ok'
+
     def uploadProblem(self, problem, zipPath, message):
         payload = {
-            'problem_alias': problem.config['alias'],
             'message': message,
         }
+
+        create = False
+
+        exists = self.problemExists(problem.alias)
+        isAdmin = self.isProblemAdmin(problem.alias)
+
+        if exists and not isAdmin:
+            raise Exception("Problem exists but user can't edit.")
+
+        if not exists:
+            if not problem.create:
+                raise Exception("Problem doesn't exist but creation is disabled.")
+            create = True
 
         payload.update(problem.config.get('params', {}))
 
@@ -47,11 +69,19 @@ class omegaUp:
         elif languages == 'karel':
             payload['languages'] = 'kp,kj'
 
-        print(payload)
-
         files = { 'problem_contents': open(zipPath, 'rb') }
 
-        return self.query("POST", "/api/problem/update", payload, files)
+        if create:
+            endpoint = "/api/problem/create"
+            payload['alias'] = problem.alias
+        else:
+            endpoint = "/api/problem/update"
+            payload['problem_alias'] = problem.alias
+
+        print('Calling endpoint: ' + endpoint)
+        print('Payload: ' + str(payload))
+
+        return self.query("POST", endpoint, payload, files)
 
     def __init__(self, user, pwd):
         self.user = user

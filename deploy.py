@@ -57,6 +57,7 @@ oUp.login()
 message = 'Deployed automatically from commit ' + env.get('TRAVIS_COMMIT', 'XXXXXX')
 status = oUp.uploadProblem(problem, zipName, message)
 
+print('Response:')
 print(status)
 
 os.remove(zipName)
