@@ -17,7 +17,7 @@ class Problem:
         self.config = yaml.load(config)
 
         self.disabled = self.config.get('disabled', False)
-        self.create = self.config.get('create', False)
+        self.create = self.config.get('create', True)
         self.interactive = self.config.get('interactive', False)
         self.generateOutput = self.config.get('generate-output', False)
 
