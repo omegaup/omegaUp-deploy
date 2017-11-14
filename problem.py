@@ -6,9 +6,6 @@ from zipfile import *
 def enumerateFullPath(path):
         return [os.path.join(path, f) for f in os.listdir(path)]
 
-def enumerateFullPathWithNames(path):
-        return [(os.path.join(path, f), f) for f in os.listdir(path)]
-
 class Problem:
     def __init__(self, path):
         config = open(os.path.join(path, 'config.yaml'), 'r').read()
@@ -58,13 +55,17 @@ class Problem:
             raise Exception(missing_outs)
 
         with ZipFile(zipPath, 'w', compression = ZIP_DEFLATED) as archive:
-            for (p, f) in enumerateFullPathWithNames(os.path.join(self.path, 'statements')):
-                archive.write(p, os.path.join('statements', f))
+            def recursiveAdd(directory):
+                for (dirpath, dirnames, filenames) in os.walk(os.path.join(self.path, directory)):
+                    for f in filenames:
+                        fullpath = os.path.join(dirpath, f)
+                        archive.write(fullpath, os.path.relpath(fullpath, self.path))
+
+            recursiveAdd('statements')
 
             for case in ins + outs:
                 _, name = os.path.split(case)
                 archive.write(case, os.path.join('cases', name))
 
             if self.interactive:
-                for (p, f) in enumerateFullPathWithNames(os.path.join(self.path, 'interactive')):
-                    archive.write(p, os.path.join('interactive', f))
+                recursiveAdd('interactive')
