@@ -1,6 +1,8 @@
 import yaml
 import os
 import subprocess
+import logging
+
 from zipfile import *
 
 def enumerateFullPath(path):
@@ -23,7 +25,7 @@ class Problem:
 
         if self.generateOutput:
             if self.interactive:
-                raise Exception("interactive and generate-output can't both be enabled")
+                raise Exception("Interactive and generate-output can't both be enabled")
 
             self.solution = self.config['solution']
             self.timeout = self.config['timeout']

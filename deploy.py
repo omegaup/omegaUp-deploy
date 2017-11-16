@@ -2,10 +2,18 @@
 
 from omegaUp import omegaUp
 from problem import Problem
+
 import os
 import argparse
 import subprocess
 import sys
+import logging
+
+logging.basicConfig(
+    format = '%(asctime)s: %(message)s',
+    datefmt = '%Y-%m-%d %H:%M:%S',
+    level = logging.INFO
+)
 
 env = os.environ
 
@@ -58,3 +66,5 @@ message = 'Deployed automatically from commit ' + env.get('TRAVIS_COMMIT', 'XXXX
 oUp.uploadProblem(problem, zipName, message)
 
 os.remove(zipName)
+
+print('Success!')

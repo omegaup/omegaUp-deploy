@@ -1,4 +1,5 @@
 import requests
+import logging
 
 class omegaUp:
     url = "https://omegaup.com"
@@ -11,8 +12,8 @@ class omegaUp:
                 tmp[k] = 'REMOVED'
             return tmp
 
-        print('Calling endpoint: ' + endpoint)
-        print('Payload: ' + str(filterKey(payload, 'password')))
+        logging.info('Calling endpoint: ' + endpoint)
+        logging.info('Payload: ' + str(filterKey(payload, 'password')))
 
         if self.auth_token is not None:
             payload['auth_token'] = self.auth_token
@@ -27,10 +28,10 @@ class omegaUp:
         try:
             response = r.json()
         except Exception:
-            print(r.text)
+            logging.exception(r.text)
             raise
 
-        print('Response: ' + str(filterKey(response, 'auth_token')))
+        logging.info('Response: ' + str(filterKey(response, 'auth_token')))
 
         if not canFail and response['status'] != 'ok':
             raise Exception(response)
@@ -133,11 +134,11 @@ class omegaUp:
             adminsToAdd = desiredAdmins - admins - {self.user.lower()}
 
             for admin in adminsToRemove:
-                print('Removing problem admin: ' + admin)
+                logging.info('Removing problem admin: ' + admin)
                 self.removeAdmin(problem.alias, admin)
 
             for admin in adminsToAdd:
-                print('Adding problem admin: ' + admin)
+                logging.info('Adding problem admin: ' + admin)
                 self.addAdmin(problem.alias, admin)
 
         if problem.adminGroups is not None:
@@ -151,11 +152,11 @@ class omegaUp:
             groupsToAdd = desiredGroups - adminGroups
 
             for group in groupsToRemove:
-                print('Removing problem admin group: ' + group)
+                logging.info('Removing problem admin group: ' + group)
                 self.removeAdminGroup(problem.alias, group)
 
             for group in groupsToAdd:
-                print('Adding problem admin group: ' + group)
+                logging.info('Adding problem admin group: ' + group)
                 self.addAdminGroup(problem.alias, group)
 
     def __init__(self, user, pwd):
