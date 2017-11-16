@@ -55,9 +55,6 @@ oUp = omegaUp(args.username, args.password)
 oUp.login()
 
 message = 'Deployed automatically from commit ' + env.get('TRAVIS_COMMIT', 'XXXXXX')
-status = oUp.uploadProblem(problem, zipName, message)
-
-print('Response:')
-print(status)
+oUp.uploadProblem(problem, zipName, message)
 
 os.remove(zipName)

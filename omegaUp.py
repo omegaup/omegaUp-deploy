@@ -5,6 +5,15 @@ class omegaUp:
     auth_token = None
 
     def query(self, method, endpoint, payload = {}, files = None, canFail = False):
+        def filterKey(x, k):
+            tmp = dict(x)
+            if k in tmp:
+                tmp[k] = 'REMOVED'
+            return tmp
+
+        print('Calling endpoint: ' + endpoint)
+        print('Payload: ' + str(filterKey(payload, 'password')))
+
         if self.auth_token is not None:
             payload['auth_token'] = self.auth_token
 
@@ -20,6 +29,8 @@ class omegaUp:
         except Exception:
             print(r.text)
             raise
+
+        print('Response: ' + str(filterKey(response, 'auth_token')))
 
         if not canFail and response['status'] != 'ok':
             raise Exception(response)
@@ -45,6 +56,30 @@ class omegaUp:
         payload = { 'problem_alias': alias }
         response = self.query("GET", "/api/problem/details", payload, canFail = True)
         return response['status'] == 'ok'
+
+    def problemAdmins(self, alias):
+        payload = { 'problem_alias': alias }
+        return self.query("GET", "/api/problem/admins", payload)
+
+    def addAdmin(self, alias, user):
+        payload = { 'problem_alias': alias,
+                    "usernameOrEmail": user }
+        return self.query("GET", "/api/problem/addAdmin", payload)
+
+    def removeAdmin(self, alias, user):
+        payload = { 'problem_alias': alias,
+                    "usernameOrEmail": user }
+        return self.query("GET", "/api/problem/removeAdmin", payload)
+
+    def addAdminGroup(self, alias, group):
+        payload = { 'problem_alias': alias,
+                    "group": group }
+        return self.query("GET", "/api/problem/addGroupAdmin", payload)
+
+    def removeAdminGroup(self, alias, group):
+        payload = { 'problem_alias': alias,
+                    "group": group }
+        return self.query("GET", "/api/problem/removeGroupAdmin", payload)
 
     def uploadProblem(self, problem, zipPath, message):
         payload = {
@@ -82,10 +117,46 @@ class omegaUp:
             endpoint = "/api/problem/update"
             payload['problem_alias'] = problem.alias
 
-        print('Calling endpoint: ' + endpoint)
-        print('Payload: ' + str(payload))
+        self.query("POST", endpoint, payload, files)
 
-        return self.query("POST", endpoint, payload, files)
+        if problem.admins is not None or problem.adminGroups is not None:
+            allAdmins = self.problemAdmins(problem.alias)
+
+        if problem.admins is not None:
+            admins = { a['username'].lower() \
+                       for a in allAdmins['admins'] \
+                       if a['role'] == 'admin' }
+
+            desiredAdmins = {admin.lower() for admin in problem.admins}
+
+            adminsToRemove = admins - desiredAdmins - {self.user.lower()}
+            adminsToAdd = desiredAdmins - admins - {self.user.lower()}
+
+            for admin in adminsToRemove:
+                print('Removing problem admin: ' + admin)
+                self.removeAdmin(problem.alias, admin)
+
+            for admin in adminsToAdd:
+                print('Adding problem admin: ' + admin)
+                self.addAdmin(problem.alias, admin)
+
+        if problem.adminGroups is not None:
+            adminGroups = { a['name'].lower() \
+                            for a in allAdmins['group_admins'] \
+                            if a['role'] == 'admin' }
+
+            desiredGroups = {group.lower() for group in problem.adminGroups}
+
+            groupsToRemove = adminGroups - desiredGroups
+            groupsToAdd = desiredGroups - adminGroups
+
+            for group in groupsToRemove:
+                print('Removing problem admin group: ' + group)
+                self.removeAdminGroup(problem.alias, group)
+
+            for group in groupsToAdd:
+                print('Adding problem admin group: ' + group)
+                self.addAdminGroup(problem.alias, group)
 
     def __init__(self, user, pwd):
         self.user = user

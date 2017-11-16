@@ -18,6 +18,9 @@ class Problem:
         self.interactive = self.config.get('interactive', False)
         self.generateOutput = self.config.get('generate-output', False)
 
+        self.admins = self.config.get('admins', None)
+        self.adminGroups = self.config.get('admin-groups', None)
+
         if self.generateOutput:
             if self.interactive:
                 raise Exception("interactive and generate-output can't both be enabled")

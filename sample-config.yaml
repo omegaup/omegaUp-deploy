@@ -1,7 +1,13 @@
 alias: dummy-problem
 
-# optional argument, if false, the problem won't be deployed
+# optional: if false, the problem won't be deployed
 # disabled: true
+
+# optional: a list of the admin users for this problem
+# admins: []
+
+# optional: a list of the admin groups for this problem
+# admin-groups: []
 
 # if true, ignores the .outs and uses the solution
 # to generate them from the .ins
