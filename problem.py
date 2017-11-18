@@ -37,7 +37,7 @@ class Problem:
         outs = []
 
         if self.generateOutput:
-            subprocess.call(["g++", "-o", "solution", os.path.join(self.path, self.solution)])
+            subprocess.call(["g++", "-O2", "-o", "solution", os.path.join(self.path, self.solution)])
 
             for f_in in ins:
                 f_out = f_in[:-3] + '.out'
