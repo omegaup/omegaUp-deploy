@@ -109,6 +109,8 @@ class omegaUp:
             payload['languages'] = 'c,cpp,cpp11,cs,hs,java,pas,py,rb,lua'
         elif languages == 'karel':
             payload['languages'] = 'kp,kj'
+        elif languages == 'none':
+            payload['languages'] = ''
 
         files = { 'problem_contents': open(zipPath, 'rb') }
 
