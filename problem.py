@@ -33,31 +33,34 @@ class Problem:
         self.alias = self.config['alias']
 
     def prepareZip(self, zipPath):
-        ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
-        outs = []
+        if self.config['params']['languages'] != 'none':
+            ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
+            outs = []
 
-        if self.generateOutput:
-            subprocess.call(["g++", "-O2", "-o", "solution", os.path.join(self.path, self.solution)])
+            if self.generateOutput:
+                subprocess.call(["g++", "-O2", "-o", "solution", os.path.join(self.path, self.solution)])
 
-            for f_in in ins:
-                f_out = f_in[:-3] + '.out'
+                for f_in in ins:
+                    f_out = f_in[:-3] + '.out'
 
-                with open(f_in, 'r') as in_file, open(f_out, 'w') as out_file:
-                    sol = subprocess.call('./solution',
-                                          stdin = in_file,
-                                          stdout = out_file,
-                                          timeout = self.timeout)
+                    with open(f_in, 'r') as in_file, open(f_out, 'w') as out_file:
+                        sol = subprocess.call('./solution',
+                                              stdin = in_file,
+                                              stdout = out_file,
+                                              timeout = self.timeout)
 
-                outs.append(f_out)
+                    outs.append(f_out)
 
-            os.remove('solution')
+                os.remove('solution')
+            else:
+                outs = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.out')]
+
+            missing_outs = [i for i in ins if i[:-3] + '.out' not in outs]
+
+            if missing_outs:
+                raise Exception(missing_outs)
         else:
-            outs = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.out')]
-
-        missing_outs = [i for i in ins if i[:-3] + '.out' not in outs]
-
-        if missing_outs:
-            raise Exception(missing_outs)
+            ins = outs = []
 
         with ZipFile(zipPath, 'w', compression = ZIP_DEFLATED) as archive:
             def recursiveAdd(directory):
