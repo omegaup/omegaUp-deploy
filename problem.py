@@ -23,6 +23,9 @@ class Problem:
         self.admins = self.config.get('admins', None)
         self.adminGroups = self.config.get('admin-groups', None)
 
+        self.params = self.config.get('params', {})
+        self.languages = self.params['languages']
+
         if self.generateOutput:
             if self.interactive:
                 raise Exception("Interactive and generate-output can't both be enabled")
@@ -33,25 +36,37 @@ class Problem:
         self.alias = self.config['alias']
 
     def prepareZip(self, zipPath):
-        if self.config['params']['languages'] != 'none':
+        if self.languages != 'none':
             ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
             outs = []
 
             if self.generateOutput:
-                subprocess.call(["g++", "-O2", "-o", "solution", os.path.join(self.path, self.solution)])
+                solutionSource = os.path.abspath(os.path.join(self.path, self.solution))
+
+                if self.languages != 'karel':
+                    subprocess.call(["g++", "-O2", "-o", "solution", solutionSource])
 
                 for f_in in ins:
                     f_out = f_in[:-3] + '.out'
 
+                    if os.path.isfile(f_out):
+                        raise Exception(".outs can't be present when generateOutput is enabled: " + f_out)
+
                     with open(f_in, 'r') as in_file, open(f_out, 'w') as out_file:
-                        sol = subprocess.call('./solution',
+                        if self.languages == 'karel':
+                            command = ['kareljs', 'run', solutionSource]
+                        else:
+                            command = './solution'
+
+                        sol = subprocess.call(command,
                                               stdin = in_file,
                                               stdout = out_file,
                                               timeout = self.timeout)
 
                     outs.append(f_out)
 
-                os.remove('solution')
+                if self.languages != 'karel':
+                    os.remove('solution')
             else:
                 outs = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.out')]
 
