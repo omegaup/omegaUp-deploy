@@ -40,6 +40,9 @@ class Problem:
             ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
             outs = []
 
+            if not ins:
+                raise Exception('No test cases found!')
+
             if self.generateOutput:
                 solutionSource = os.path.abspath(os.path.join(self.path, self.solution))
 
@@ -77,6 +80,10 @@ class Problem:
         else:
             ins = outs = []
 
+        karelSample = os.path.abspath(os.path.join(self.path, 'examples', 'sample.in'))
+        if self.languages == 'karel' and not os.path.isfile(karelSample):
+            raise Exception("Karel problems need an example file at examples/sample.in.")
+
         with ZipFile(zipPath, 'w', compression = ZIP_DEFLATED) as archive:
             def recursiveAdd(directory):
                 for (dirpath, dirnames, filenames) in os.walk(os.path.join(self.path, directory)):
@@ -85,6 +92,9 @@ class Problem:
                         archive.write(fullpath, os.path.relpath(fullpath, self.path))
 
             recursiveAdd('statements')
+
+            if self.languages == 'karel':
+                recursiveAdd('examples')
 
             for case in ins + outs:
                 _, name = os.path.split(case)
