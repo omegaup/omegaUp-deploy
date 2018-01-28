@@ -30,8 +30,15 @@ path = args.path[0]
 problemPath, problemDir = os.path.split(path)
 
 if args.onlychanges:
+    commitRange = None
+
+    if env.get('TRAVIS'):
+        commitRange = env['TRAVIS_COMMIT_RANGE']
+    elif env.get('CIRCLECI'):
+        commitRange = env['CIRCLE_COMPARE_URL'].split('/')[6]
+
     git = subprocess.Popen(
-        ["git", "diff", "--name-only", "--diff-filter=AMDR", env['TRAVIS_COMMIT_RANGE']],
+        ["git", "diff", "--name-only", "--diff-filter=AMDR", commitRange],
         stdout = subprocess.PIPE,
         cwd = problemPath)
 
