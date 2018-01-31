@@ -61,10 +61,13 @@ class Problem:
                         else:
                             command = './solution'
 
-                        sol = subprocess.call(command,
+                        ret = subprocess.call(command,
                                               stdin = in_file,
                                               stdout = out_file,
                                               timeout = self.timeout)
+
+                        if ret != 0:
+                            raise Exception("Model solution RTE!")
 
                     outs.append(f_out)
 
