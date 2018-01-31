@@ -85,11 +85,19 @@ class Problem:
             raise Exception("Karel problems need an example file at examples/sample.in.")
 
         with ZipFile(zipPath, 'w', compression = ZIP_DEFLATED) as archive:
+            def addFile(path):
+                archive.write(path, os.path.relpath(path, self.path))
+
             def recursiveAdd(directory):
                 for (dirpath, dirnames, filenames) in os.walk(os.path.join(self.path, directory)):
                     for f in filenames:
-                        fullpath = os.path.join(dirpath, f)
-                        archive.write(fullpath, os.path.relpath(fullpath, self.path))
+                        addFile(os.path.join(dirpath, f))
+
+            testplan = os.path.join(self.path, 'testplan')
+
+            if os.path.isfile(testplan):
+                print('Adding testplan.')
+                addFile(testplan)
 
             recursiveAdd('statements')
 
