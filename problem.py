@@ -23,6 +23,8 @@ class Problem:
         self.admins = self.config.get('admins', None)
         self.adminGroups = self.config.get('admin-groups', None)
 
+        self.tags = self.config.get('tags', None)
+
         self.params = self.config.get('params', {})
         self.languages = self.params['languages']
 
@@ -60,6 +62,8 @@ class Problem:
                             command = ['kareljs', 'run', solutionSource]
                         else:
                             command = './solution'
+
+                        logging.info('Generating output for: ' + f_in)
 
                         ret = subprocess.call(command,
                                               stdin = in_file,
@@ -99,7 +103,7 @@ class Problem:
             testplan = os.path.join(self.path, 'testplan')
 
             if os.path.isfile(testplan):
-                print('Adding testplan.')
+                logging.info('Adding testplan.')
                 addFile(testplan)
 
             recursiveAdd('statements')

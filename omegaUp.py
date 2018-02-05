@@ -59,6 +59,21 @@ class omegaUp:
         response = self.query("GET", "/api/problem/details", payload, canFail = True)
         return response['status'] == 'ok'
 
+    def problemTags(self, alias):
+        payload = { 'problem_alias': alias }
+        return self.query("GET", "/api/problem/tags", payload)
+
+    def addProblemTag(self, alias, tag, visibility):
+        payload = { 'problem_alias': alias,
+                    'name': tag,
+                    'public': visibility }
+        return self.query("GET", "/api/problem/addTag", payload)
+
+    def removeProblemTag(self, alias, tag):
+        payload = { 'problem_alias': alias,
+                    'name': tag }
+        return self.query("GET", "/api/problem/removeTag", payload)
+
     def problemAdmins(self, alias):
         payload = { 'problem_alias': alias }
         return self.query("GET", "/api/problem/admins", payload)
@@ -161,6 +176,24 @@ class omegaUp:
             for group in groupsToAdd:
                 logging.info('Adding problem admin group: ' + group)
                 self.addAdminGroup(problem.alias, group)
+
+        if problem.tags is not None:
+            tags = { t['name'].lower() for t in \
+                     self.problemTags(problem.alias)['tags'] }
+
+            desiredTags = { t.lower() for t in problem.tags}
+
+            tagsToRemove = tags - desiredTags
+            tagsToAdd = desiredTags - tags
+
+            for tag in tagsToRemove:
+                logging.info('Removing problem tag: ' + tag)
+                self.removeProblemTag(problem.alias, tag)
+
+            for tag in tagsToAdd:
+                logging.info('Adding problem tag: ' + tag)
+                self.addProblemTag(problem.alias, tag, \
+                       payload.get('visibility', '0'))
 
     def __init__(self, user, pwd):
         self.user = user
