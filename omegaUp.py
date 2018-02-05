@@ -114,12 +114,12 @@ class omegaUp:
 
         files = { 'problem_contents': open(zipPath, 'rb') }
 
+        payload['problem_alias'] = problem.alias
+
         if create:
             endpoint = "/api/problem/create"
-            payload['alias'] = problem.alias
         else:
             endpoint = "/api/problem/update"
-            payload['problem_alias'] = problem.alias
 
         self.query("POST", endpoint, payload, files)
 
