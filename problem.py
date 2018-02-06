@@ -85,7 +85,7 @@ class Problem:
                                               timeout = self.timeout)
 
                         if ret != 0:
-                            raise Exception("Model solution RTE!")
+                            raise Exception("png creation failure!")
 
                 if self.languages != 'karel':
                     os.remove('solution')
