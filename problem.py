@@ -15,6 +15,8 @@ class Problem:
         self.path = path
         self.config = yaml.load(config)
 
+        self.validator = self.config.get('validator', None)
+
         self.disabled = self.config.get('disabled', False)
         self.create = self.config.get('create', True)
         self.interactive = self.config.get('interactive', False)
@@ -75,6 +77,16 @@ class Problem:
 
                     outs.append(f_out)
 
+                    if self.languages == 'karel':
+                        logging.info('Generating png for: ' + f_in)
+                        command = ['kareljs', 'draw', f_in]
+
+                        ret = subprocess.call(command,
+                                              timeout = self.timeout)
+
+                        if ret != 0:
+                            raise Exception("Model solution RTE!")
+
                 if self.languages != 'karel':
                     os.remove('solution')
             else:
@@ -105,6 +117,18 @@ class Problem:
             if os.path.isfile(testplan):
                 logging.info('Adding testplan.')
                 addFile(testplan)
+
+            if self.params['validator'] == 'custom' and \
+                 self.validator is None:
+                raise Exception('Custom validator missing!')
+
+            if self.validator is not None:
+                validator = os.path.join(self.path, self.validator)
+
+                if not os.path.isfile(validator):
+                    raise Exception('Custom validator missing: ' + self.validator)
+
+                addFile(validator)
 
             recursiveAdd('statements')
 
