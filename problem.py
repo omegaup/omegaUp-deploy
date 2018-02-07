@@ -18,7 +18,7 @@ class Problem:
         self.validator = self.config.get('validator', None)
 
         self.disabled = self.config.get('disabled', False)
-        self.create = self.config.get('create', True)
+        self.create = self.config.get('create', False)
         self.interactive = self.config.get('interactive', False)
         self.generateOutput = self.config.get('generate-output', False)
 

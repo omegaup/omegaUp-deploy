@@ -69,7 +69,14 @@ oUp = omegaUp(args.username, args.password)
 
 oUp.login()
 
-message = 'Deployed automatically from commit ' + env.get('TRAVIS_COMMIT', 'XXXXXX')
+if env.get('TRAVIS'):
+    commit = env['TRAVIS_COMMIT']
+elif env.get('CIRCLECI'):
+    commit = env['CIRCLE_SHA1']
+else:
+    commit = 'XXXXXX'
+
+message = 'Deployed automatically from commit ' + commit
 oUp.uploadProblem(problem, zipName, message)
 
 os.remove(zipName)
