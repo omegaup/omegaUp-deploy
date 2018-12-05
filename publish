@@ -1,0 +1,14 @@
+#/usr/bin/env bash
+
+git config --global user.email "circleci@freddy.mx"
+git config --global user.name "COMI"
+
+ssh-add -D
+ssh-add ~/.ssh/id_rsa_687169b1d6674f19c31afac88b74d636
+
+git add .
+git commit -m "Generated files from $CIRCLE_SHA1"
+git checkout public
+git merge --no-commit --no-ff -X theirs master
+git commit -m "Auto deployed from $CIRCLE_SHA1"
+git push origin public

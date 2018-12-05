@@ -12,4 +12,9 @@ name = "pypi"
 [packages]
 
 requests = "*"
-pyyaml = "*"
+requests-toolbelt = "*"
+
+
+[requires]
+
+python_version = "3.5"
