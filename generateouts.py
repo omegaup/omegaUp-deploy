@@ -90,7 +90,7 @@ for p in problems():
                     if ret != 0:
                         raise Exception("Model solution RTE!")
 
-                if False and languages == 'karel': # TODO: enable this
+                if languages == 'karel':
                     f_png = f_in[:-3] + '.png'
 
                     logger.info('Generating png: ' + f_png)

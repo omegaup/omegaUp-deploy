@@ -179,7 +179,7 @@ class omegaUp:
                 self.addAdmin(alias, admin)
 
         if targetAdminGroups is not None:
-            adminGroups = {a['name'].lower()
+            adminGroups = {a['alias'].lower()
                            for a in allAdmins['group_admins']
                            if a['role'] == 'admin'}
 
