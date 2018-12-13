@@ -29,7 +29,12 @@ class EphemeralGrader:
                 json=payload,
                 timeout=75)
 
-        multipart = decoder.MultipartDecoder.from_response(r)
+        try:
+            multipart = decoder.MultipartDecoder.from_response(r)
+        except:
+            logging.error("Couldn't decode omegaUp response!")
+            logging.exception(r.text)
+            sys.exit(1)
 
         for part in multipart.parts:
                 if b'details' in part.headers[b'Content-Disposition']:
