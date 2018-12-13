@@ -27,7 +27,7 @@ class EphemeralGrader:
         r = requests.post(
                 self.endpoint,
                 json=payload,
-                timeout=65)
+                timeout=75)
 
         multipart = decoder.MultipartDecoder.from_response(r)
 
