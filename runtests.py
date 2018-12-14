@@ -157,11 +157,18 @@ for p in problems():
 
                 response = grader.judge(source, language, graderInput)
 
+		if 'compile_error' in response:
+		    logger.error('Compilation error:\n' +
+				 response['compile_error'])
+
+		    raise TestCaseFailure
+
                 required = 0
                 score = int(round(response['contest_score']))
 
                 if 'verdict' in solution:
                     required += 1
+
                     if solution['verdict'] != response['verdict']:
                         logger.warning(
                             'Verdict mismatch! Expected {}, got {}'.format(
@@ -169,31 +176,31 @@ for p in problems():
                             )
                         )
 
-                        if 'compile_error' in response:
-                            logger.error('Compilation error:' +
-                                         response['compile_error'])
-
                         raise TestCaseFailure
 
                 if 'score' in solution:
                     required += 1
+
                     if score != solution['score']:
                         logger.warning(
                             'Score mismatch! Expected {}, got {}'.format(
                                 solution['score'], score
                             )
                         )
+
                         raise TestCaseFailure
                 elif 'score_range' in solution:
                     required += 1
                     lower_bound = solution['score_range'][0]
                     upper_bound = solution['score_range'][1]
+
                     if score < lower_bound or score > upper_bound:
                         logger.warning(
                             'Score out of bounds! Expected [{}, {}], got {}'.format(
                                 lower_bound, upper_bound, score
                             )
                         )
+
                         raise TestCaseFailure
 
                 if required == 0:
