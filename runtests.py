@@ -157,11 +157,11 @@ for p in problems():
 
                 response = grader.judge(source, language, graderInput)
 
-		if 'compile_error' in response:
-		    logger.error('Compilation error:\n' +
-				 response['compile_error'])
+                if 'compile_error' in response:
+                    logger.error('Compilation error:\n' +
+                                 response['compile_error'])
 
-		    raise TestCaseFailure
+                    raise TestCaseFailure
 
                 required = 0
                 score = int(round(response['contest_score']))
