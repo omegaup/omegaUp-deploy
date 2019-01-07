@@ -6,6 +6,7 @@ git config --global user.name "COMI"
 ssh-add -D
 ssh-add ~/.ssh/id_rsa_687169b1d6674f19c31afac88b74d636
 
+cd ..
 git add .
 git commit -m "Generated files from $CIRCLE_SHA1"
 git checkout public
