@@ -11,7 +11,7 @@ name = "pypi"
 
 [packages]
 
-requests = "*"
+requests = ">=2.20.0"
 requests-toolbelt = "*"
 
 

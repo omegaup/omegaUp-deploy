@@ -8,7 +8,10 @@ from problems import problems
 import compiler
 
 def enumerateFullPath(path):
-    return [os.path.join(path, f) for f in os.listdir(path)]
+    if os.path.exists(path):
+        return [os.path.join(path, f) for f in os.listdir(path)]
+    else:
+        return []
 
 logger = logging.getLogger(__name__)
 
@@ -59,14 +62,17 @@ for p in problems():
 
     with compiler.compile(genPath) as generator:
         casesPath = os.path.join(path, 'cases')
+        examplesPath = os.path.join(path, 'examples')
 
         languages = pConfig['misc']['languages'] 
 
         # TODO: if karel, enforce examples
 
         if languages != 'none':
-            ins = [f for f in enumerateFullPath(
-                   os.path.join(casesPath)) if f.endswith('.in')]
+            ins = [f
+                   for f in enumerateFullPath(os.path.join(p))
+                   if f.endswith('.in')
+                   for p in [casesPath, examplesPath]]
             outs = []
 
             if not ins:
