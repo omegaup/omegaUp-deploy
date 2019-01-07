@@ -70,9 +70,9 @@ for p in problems():
 
         if languages != 'none':
             ins = [f
-                   for f in enumerateFullPath(os.path.join(p))
+                   for f in enumerateFullPath(cpath)
                    if f.endswith('.in')
-                   for p in [casesPath, examplesPath]]
+                   for cpath in [casesPath, examplesPath]]
             outs = []
 
             if not ins:
