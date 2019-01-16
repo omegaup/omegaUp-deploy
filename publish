@@ -4,7 +4,7 @@ git config --global user.email "circleci@freddy.mx"
 git config --global user.name "COMI"
 
 ssh-add -D
-ssh-add ~/.ssh/id_rsa_687169b1d6674f19c31afac88b74d636
+ssh-add ~/.ssh/id_rsa_*
 
 cd ..
 git add .
