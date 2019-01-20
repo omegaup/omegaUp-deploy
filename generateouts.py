@@ -99,7 +99,7 @@ for p in problems():
                 if languages == 'karel':
                     logger.info('Generating pngs.')
 
-                    def generate(command, png_path):
+                    def generate(command):
                         logger.info('Running command: ' + str(command))
 
                         with open(f_in, 'r') as in_file:
