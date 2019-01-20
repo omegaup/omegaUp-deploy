@@ -97,17 +97,20 @@ for p in problems():
                         raise Exception("Model solution RTE!")
 
                 if languages == 'karel':
-                    f_png = f_in[:-3] + '.png'
+                    logger.info('Generating pngs.')
 
-                    logger.info('Generating png: ' + f_png)
-                    command = ['kareljs', 'draw', "--output", f_png]
+                    def generate(command, png_path):
+                        logger.info('Running command: ' + str(command))
 
-                    with open(f_in, 'r') as in_file:
-                        ret = subprocess.call(command,
-                                              stdin=in_file,
-                                              timeout=5)
+                        with open(f_in, 'r') as in_file:
+                            ret = subprocess.call(command,
+                                                  stdin=in_file,
+                                                  timeout=5)
 
-                    if ret != 0:
-                        raise Exception("png creation failure!")
+                        if ret != 0:
+                            raise Exception("png creation failure!")
+
+                    generate(['kareljs', 'draw', "--output", f_in + '.png'])
+                    generate(['kareljs', 'draw', "--output", f_out + '.png', "--run", genPath])
 
     print('Success generating outputs for {}'.format(title))
