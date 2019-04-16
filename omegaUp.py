@@ -170,13 +170,13 @@ class omegaUp:
             adminsToRemove = admins - desiredAdmins - {self.user.lower()}
             adminsToAdd = desiredAdmins - admins - {self.user.lower()}
 
-            for admin in adminsToRemove:
-                logging.info('Removing problem admin: ' + admin)
-                self.removeAdmin(alias, admin)
-
             for admin in adminsToAdd:
                 logging.info('Adding problem admin: ' + admin)
                 self.addAdmin(alias, admin)
+
+            for admin in adminsToRemove:
+                logging.info('Removing problem admin: ' + admin)
+                self.removeAdmin(alias, admin)
 
         if targetAdminGroups is not None:
             adminGroups = {a['alias'].lower()
@@ -188,13 +188,13 @@ class omegaUp:
             groupsToRemove = adminGroups - desiredGroups
             groupsToAdd = desiredGroups - adminGroups
 
-            for group in groupsToRemove:
-                logging.info('Removing problem admin group: ' + group)
-                self.removeAdminGroup(alias, group)
-
             for group in groupsToAdd:
                 logging.info('Adding problem admin group: ' + group)
                 self.addAdminGroup(alias, group)
+
+            for group in groupsToRemove:
+                logging.info('Removing problem admin group: ' + group)
+                self.removeAdminGroup(alias, group)
 
         if 'tags' in misc:
             tags = {t['name'].lower() for t in
@@ -205,14 +205,14 @@ class omegaUp:
             tagsToRemove = tags - desiredTags
             tagsToAdd = desiredTags - tags
 
-            for tag in tagsToRemove:
-                logging.info('Removing problem tag: ' + tag)
-                self.removeProblemTag(alias, tag)
-
             for tag in tagsToAdd:
                 logging.info('Adding problem tag: ' + tag)
                 self.addProblemTag(alias, tag,
                                    payload.get('visibility', '0'))
+
+            for tag in tagsToRemove:
+                logging.info('Removing problem tag: ' + tag)
+                self.removeProblemTag(alias, tag)
 
     def __init__(self, user, pwd):
         self.user = user
