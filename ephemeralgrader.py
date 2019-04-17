@@ -51,7 +51,7 @@ class EphemeralGrader:
             with open(testplan, 'r') as tp:
                 caseWeights = {}
                 for line in tp.readlines():
-                    if line == ''
+                    if line == '':
                         raise InvalidProblemException(
                             'Empty line in testplan'
                         )
