@@ -50,8 +50,8 @@ class KarelTest:
 
     def assertTightWorldSize(self):
         x, y = self.worldBoundaries()
-        self.assertEqual(x, self.world.w)
-        self.assertEqual(y, self.world.h)
+        self.assertEqual(self.world.w, x)
+        self.assertEqual(self.world.h, y)
 
     def assertNoInnerWalls(self):
         cells = self.reachableCells()
