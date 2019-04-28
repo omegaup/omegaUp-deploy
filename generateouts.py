@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import subprocess
+import re
 from problems import problems
 
 import compiler
@@ -110,7 +111,12 @@ for p in problems():
                         if ret != 0:
                             raise Exception("png creation failure!")
 
-                    generate(['kareljs', 'draw', "--output", f_in + '.png'])
-                    generate(['kareljs', 'draw', "--output", f_out + '.png', "--run", genPath])
+                    dimOpts = []
+                    dimMatch = re.search('\.(\d*)x(\d*)\.in', f_in)
+                    if dimMatch:
+                        dimOpts = ['--height', dimMatch.group(1), '--width', dimMatch.group(2)]
+
+                    generate(['kareljs', 'draw', "--output", f_in + '.png'] + dimOpts)
+                    generate(['kareljs', 'draw', "--output", f_out + '.png', "--run", genPath] + dimOpts)
 
     print('Success generating outputs for {}'.format(title))
