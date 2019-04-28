@@ -64,6 +64,7 @@ for p in problems():
     with compiler.compile(genPath) as generator:
         casesPath = os.path.join(path, 'cases')
         examplesPath = os.path.join(path, 'examples')
+        statementsPath = os.path.join(path, 'statements')
 
         languages = pConfig['misc']['languages'] 
 
@@ -71,7 +72,7 @@ for p in problems():
 
         if languages != 'none':
             ins = [f
-                   for cpath in [casesPath, examplesPath]
+                   for cpath in [casesPath, examplesPath, statementsPath]
                    for f in enumerateFullPath(cpath)
                    if f.endswith('.in')]
             outs = []
