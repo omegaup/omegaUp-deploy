@@ -30,6 +30,9 @@ class EphemeralGrader:
                 timeout=75)
 
         try:
+            token = r.headers["x-omegaup-ephemeraltoken"]
+            logging.info("Grader URL: https://omegaup.com/grader/ephemeral/#" + token)
+            
             multipart = decoder.MultipartDecoder.from_response(r)
         except:
             logging.error("Couldn't decode omegaUp response!")
