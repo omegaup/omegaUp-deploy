@@ -31,7 +31,7 @@ class EphemeralGrader:
 
         try:
             token = r.headers["x-omegaup-ephemeraltoken"]
-            logging.info("Grader URL: https://omegaup.com/grader/ephemeral/#" + token)
+            logging.info("Grader URL: https://omegaup.com/grader/ephemeral/#%s", token)
             
             multipart = decoder.MultipartDecoder.from_response(r)
         except:
