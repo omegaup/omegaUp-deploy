@@ -40,3 +40,15 @@ class CTest:
             raise TestFailure(
                 'Inequality failure!\nGot: {}'.format(p)
             )
+
+    def assertIn(self, p, q):
+        if p in q:
+            raise TestFailure(
+                '{} not found in {}'.format(p,q)
+            )
+
+    def assertNotIn(self, p, q):
+        if p not in q:
+            raise TestFailure(
+                '{} found in {}'.format(p,q)
+            )
