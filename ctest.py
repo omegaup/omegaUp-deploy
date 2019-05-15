@@ -41,6 +41,12 @@ class CTest:
                 'Inequality failure!\nGot: {}'.format(p)
             )
 
+    def assertLess(self, p, q):
+        if p != q:
+            raise TestFailure(
+                'failure! {} is not ess than {}'.format(q,p)
+            )
+
     def assertIn(self, p, q):
         if p not in q:
             raise TestFailure(
