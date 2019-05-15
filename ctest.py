@@ -42,13 +42,13 @@ class CTest:
             )
 
     def assertIn(self, p, q):
-        if p in q:
+        if p not in q:
             raise TestFailure(
                 '{} not found in {}'.format(p,q)
             )
 
     def assertNotIn(self, p, q):
-        if p not in q:
+        if p in q:
             raise TestFailure(
                 '{} found in {}'.format(p,q)
             )
