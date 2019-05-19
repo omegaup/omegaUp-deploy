@@ -72,12 +72,10 @@ class KarelInput(object):
         self.__zumbadores = {(x['x'], x['y']): x['zumbadores']
                              for x in lista_zumbadores}
 
-        limites = [
-            {
-                'comando': x.attrib['nombre'],
-                'max': int(x.attrib['maximoNumeroDeEjecuciones']),
-            } for x in self.root.findall('condiciones/comando')]
-        self.__limites = {x['comando']: x['max'] for x in limites}
+        self.__limites = {
+            x.attrib['nombre']: int(x.attrib['maximoNumeroDeEjecuciones'])
+            for x in self.root.findall('condiciones/comando')
+        }
 
         lista_dump = [{k: int(x.attrib[k]) for k in x.attrib} for x in
                       self.root.findall('mundos/mundo/posicionDump')]
@@ -355,18 +353,15 @@ class KarelOutput(object):
 
     @property
     def longitud_stack(self):
-        """El tamanio maximo que puede tener el stack"""
+        """El tamaño maximo que puede tener el stack"""
         return self.__longitud_stack
 
-    def limiteComando(self, comando):
+    def limite_comando(self, comando):
         """Regresa el número máximo de veces que se puede usar un comando
 
         Si no hay límite, regresa None
         """
-        if comando not in self.__limites:
-            return None
-
-        return int(self.__limites[comando])
+        return self.__limites.get(comando, None)
 
     def zumbadores(self, casilla_x, casilla_y):
         """Regresa el número de zumbadores para la casilla en (x, y)
