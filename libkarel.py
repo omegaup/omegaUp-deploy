@@ -42,6 +42,10 @@ class KarelInput(object):
     def __init__(self, string):
         self.root = ET.fromstring(string)
         mundo = self.root.find('mundos/mundo').attrib
+        condiciones = self.root.find('condiciones').attrib
+        self.__instrucciones_maximas = int(condiciones['instruccionesMaximasAEjecutar'])
+        self.__longitud_stack = int(condiciones['longitudStack'])
+
         self.__w = int(mundo['ancho'])
         self.__h = int(mundo['alto'])
         programa = self.root.find('programas/programa').attrib
@@ -67,6 +71,13 @@ class KarelInput(object):
             } for x in self.root.findall('mundos/mundo/monton')]
         self.__zumbadores = {(x['x'], x['y']): x['zumbadores']
                              for x in lista_zumbadores}
+
+        limites = [
+            {
+                'comando': x.attrib['nombre'],
+                'max': int(x.attrib['maximoNumeroDeEjecuciones']),
+            } for x in self.root.findall('condiciones/comando')]
+        self.__limites = {x['comando']: x['max'] for x in limites}
 
         lista_dump = [{k: int(x.attrib[k]) for k in x.attrib} for x in
                       self.root.findall('mundos/mundo/posicionDump')]
@@ -236,6 +247,11 @@ class KarelInput(object):
         """El conjunto de casillas marcadas para generar una salida."""
         return self.__dump
 
+    @property
+    def instrucciones_maximas(self):
+        """Instrucciones maximas a ejecutar"""
+        return self.__instrucciones_maximas
+
     def dump(self, casilla_x, casilla_y):
         """Regresa True si la casilla está marcada para generar una salida."""
         return (casilla_x, casilla_y) in self.__dump
@@ -336,6 +352,21 @@ class KarelOutput(object):
     def instrucciones(self):
         """Un diccionario con el número de instrucciones que karel ejecutó"""
         return self.__instrucciones
+
+    @property
+    def longitud_stack(self):
+        """El tamanio maximo que puede tener el stack"""
+        return self.__longitud_stack
+
+    def limiteComando(self, comando):
+        """Regresa el número máximo de veces que se puede usar un comando
+
+        Si no hay límite, regresa None
+        """
+        if comando not in self.__limites:
+            return None
+
+        return int(self.__limites[comando])
 
     def zumbadores(self, casilla_x, casilla_y):
         """Regresa el número de zumbadores para la casilla en (x, y)
