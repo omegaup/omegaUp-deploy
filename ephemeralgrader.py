@@ -23,7 +23,6 @@ class EphemeralGrader:
             "language": language,
             "source": source,
         }
-
         r = requests.post(
                 self.endpoint,
                 json=payload,
@@ -32,11 +31,12 @@ class EphemeralGrader:
         try:
             token = r.headers["x-omegaup-ephemeraltoken"]
             logging.info("Grader URL: https://omegaup.com/grader/ephemeral/#%s", token)
-            
+
             multipart = decoder.MultipartDecoder.from_response(r)
         except:
-            logging.error("Couldn't decode omegaUp response!")
-            logging.exception(r.text)
+            logging.exception(
+                    "Couldn't decode omegaUp response! Complete payload: %s",
+                    json.dumps(payload, indent='  '))
             sys.exit(1)
 
         for part in multipart.parts:
