@@ -14,9 +14,9 @@ class KarelTest:
 
     def __init__(self):
         with open('data.in', 'r') as data_in:
-            self.input = self.world = KarelInput(data_in.read())
+            self.input = self.world = libkarel.KarelInput(data_in.read())
         with open('data.out', 'r') as data_out:
-            self.output = KarelOutput(data_out.read())
+            self.output = libkarel.KarelOutput(data_out.read())
         self.caseName = sys.argv[1]
 
     def reachableCells(self):
