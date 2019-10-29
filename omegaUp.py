@@ -17,7 +17,7 @@ class omegaUp:
         logging.info('Payload: ' + str(filterKey(payload, 'password')))
 
         if self.auth_token is not None:
-            payload['auth_token'] = self.auth_token
+            payload['ouat'] = self.auth_token
 
         if method == 'GET':
             r = requests.get(self.url + endpoint, params=payload)
