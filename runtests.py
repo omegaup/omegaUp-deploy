@@ -51,6 +51,9 @@ for p in problems():
     with open(os.path.join(path, 'settings.json'), 'r') as pc:
         pConfig = json.loads(pc.read())
 
+    if pConfig['misc']['languages'] == 'none':
+        logger.warn('Skipping tests for no-submissions problem.')
+        continue
 
     testPath = os.path.join(path, 'tests')
     testConfigPath = os.path.join(testPath, 'tests.json')
