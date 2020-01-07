@@ -144,7 +144,7 @@ class omegaUp:
         languages = payload.get('languages', '')
 
         if languages == 'all':
-            payload['languages'] = 'c,cpp,cpp11,cs,hs,java,lua,pas,py,rb'
+            payload['languages'] = 'c11-gcc,c11-clang,cpp11-gcc,cpp11-clang,cpp17-gcc,cpp17-clang,cs,hs,java,lua,pas,py2,py3,rb'
         elif languages == 'karel':
             payload['languages'] = 'kj,kp'
         elif languages == 'none':
