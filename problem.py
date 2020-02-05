@@ -131,6 +131,7 @@ class Problem:
                 addFile(validator)
 
             recursiveAdd('statements')
+            recursiveAdd('solutions')
 
             if self.languages == 'karel':
                 recursiveAdd('examples')
