@@ -66,6 +66,7 @@ for p in problems():
             addFile(validator)
 
         recursiveAdd('statements')
+        recursiveAdd('solutions')
 
         if languages == 'karel':
             recursiveAdd('examples')
