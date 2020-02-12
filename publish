@@ -8,8 +8,8 @@ ssh-add ~/.ssh/id_rsa_*
 
 cd ..
 git add .
-git commit -m "Generated files from $CIRCLE_SHA1"
+git commit -m "Generated files from $GITHUB_SHA"
 git checkout public
 git merge --no-commit --no-ff -X theirs master
-git commit -m "Auto deployed from $CIRCLE_SHA1"
+git commit -m "Auto deployed from $GITHUB_SHA"
 git push origin public

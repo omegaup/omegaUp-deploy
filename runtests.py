@@ -22,20 +22,6 @@ logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
 env = os.environ
 
-if env.get('CIRCLE_BRANCH', None) == 'master':
-    git = subprocess.Popen(
-        ["git", "log", "-1", "--pretty=%B"],
-        stdout = subprocess.PIPE)
-
-    git.wait()
-
-    if '#test-all' in str(git.stdout.read()):
-        logger.info('Testing everything as requested.')
-    else:
-        logger.info('Not running tests on master.')
-        sys.exit(0)
-
-
 anyFailure = False
 
 for p in problems():

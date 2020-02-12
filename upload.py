@@ -80,6 +80,8 @@ for p in problems():
         commit = env['TRAVIS_COMMIT']
     elif env.get('CIRCLECI'):
         commit = env['CIRCLE_SHA1']
+    elif env.get('GITHUB_ACTIONS'):
+        commit = env['GITHUB_SHA']
     else:
         commit = 'XXXXXX'
 

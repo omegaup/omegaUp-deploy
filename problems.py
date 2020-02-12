@@ -23,10 +23,6 @@ def problems():
     if '--all' in sys.argv:
         logger.info('Loading everything as requested.')
         return problems
-    elif ('CIRCLE_BRANCH' in env and
-          env['CIRCLE_BRANCH'] in ['master', 'public']):
-        logger.info('Loading all problems for special branch.')
-        return problems
 
     problems = []
 
