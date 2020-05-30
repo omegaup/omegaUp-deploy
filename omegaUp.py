@@ -19,10 +19,12 @@ class omegaUp:
         if self.auth_token is not None:
             payload['ouat'] = self.auth_token
 
+        longTime = 60 * 10 # 10 minutes
+
         if method == 'GET':
-            r = requests.get(self.url + endpoint, params=payload)
+            r = requests.get(self.url + endpoint, params=payload, timeout=longTime)
         elif method == 'POST':
-            r = requests.post(self.url + endpoint, params=payload, files=files)
+            r = requests.post(self.url + endpoint, params=payload, files=files, timeout=longTime)
         else:
             raise Exception(method)
 
