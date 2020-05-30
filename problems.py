@@ -28,9 +28,9 @@ def problems():
 
     logger.info('Loading git diff.')
 
-    if 'TRAVIS_COMMIT_RANGE' in env:
+    if env.get('TRAVIS_COMMIT_RANGE'):
         commitRange = env['TRAVIS_COMMIT_RANGE']
-    elif 'CIRCLE_COMPARE_URL' in env:
+    elif env.get('CIRCLE_COMPARE_URL'):
         commitRange = env['CIRCLE_COMPARE_URL'].split('/')[6]
     else:
         commitRange = 'origin/master...HEAD'
