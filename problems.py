@@ -28,8 +28,15 @@ def problems():
 
     logger.info('Loading git diff.')
 
+    if 'TRAVIS_COMMIT_RANGE' in env:
+        commitRange = env['TRAVIS_COMMIT_RANGE']
+    elif 'CIRCLE_COMPARE_URL' in env:
+        commitRange = env['CIRCLE_COMPARE_URL'].split('/')[6]
+    else:
+        commitRange = 'origin/master...HEAD'
+
     git = subprocess.Popen(
-        ["git", "diff", "--name-only", "--diff-filter=AMDR", 'origin/master...HEAD'],
+        ["git", "diff", "--name-only", "--diff-filter=AMDR", commitRange],
         stdout = subprocess.PIPE)
 
     git.wait()
