@@ -33,7 +33,7 @@ def problems():
     elif env.get('CIRCLE_COMPARE_URL'):
         commitRange = env['CIRCLE_COMPARE_URL'].split('/')[6]
     elif env.get('GITHUB_BASE_COMMIT'):
-        commitRange = env['GITHUB_BASE_COMMIT'] + '..HEAD'
+        commitRange = env['GITHUB_BASE_COMMIT'] + '...HEAD'
     else:
         commitRange = 'origin/master...HEAD'
 
