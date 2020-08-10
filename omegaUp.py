@@ -199,8 +199,8 @@ class omegaUp:
                 self.removeAdminGroup(alias, group)
 
         if 'tags' in misc:
-            tags = {t['name'].lower() for t in
-                    self.problemTags(alias)['tags']}
+            tags = {'problemTag' + t['name'].lower()
+                    for t in self.problemTags(alias)['tags']}
 
             desiredTags = {t.lower() for t in misc['tags']}
 
