@@ -204,8 +204,8 @@ class omegaUp:
 
             desiredTags = {t.lower() for t in misc['tags']}
 
-            tagsToRemove = tags - desiredTags - restrictedTags
-            tagsToAdd = desiredTags - tags - restrictedTags
+            tagsToRemove = tags - desiredTags
+            tagsToAdd = desiredTags - tags
 
             for tag in tagsToRemove:
                 if 'problemRestrictedTag' in tag:
