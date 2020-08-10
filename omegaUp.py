@@ -61,7 +61,7 @@ class omegaUp:
         payload = {'problem_alias': alias}
         response = self.query(
             "GET", "/api/problem/details", payload, canFail=True)
-        return response['exists']
+        return response.get('status') == 'ok'
 
     def problemTags(self, alias):
         payload = {'problem_alias': alias}
