@@ -202,21 +202,21 @@ class omegaUp:
             tags = {t['name'].lower() for t in
                     self.problemTags(alias)['tags']}
 
-            restrictedTags = {'karel', 'lenguaje', 'solo-salida', 'interactive'}
-
             desiredTags = {t.lower() for t in misc['tags']}
 
             tagsToRemove = tags - desiredTags - restrictedTags
             tagsToAdd = desiredTags - tags - restrictedTags
 
+            for tag in tagsToRemove:
+                if 'problemRestrictedTag' in tag:
+                    logging.info('Skipping restricted tag: ' + tag)
+                else:
+                    self.removeProblemTag(alias, tag)
+
             for tag in tagsToAdd:
                 logging.info('Adding problem tag: ' + tag)
                 self.addProblemTag(alias, tag,
                                    payload.get('visibility', '0'))
-
-            for tag in tagsToRemove:
-                logging.info('Removing problem tag: ' + tag)
-                self.removeProblemTag(alias, tag)
 
     def __init__(self, user, pwd):
         self.user = user
