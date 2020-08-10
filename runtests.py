@@ -115,7 +115,6 @@ for p in problems():
                 if os.path.islink('data.out'):
                     os.remove('data.out')
 
-    if testConfig['solutions']:
         logger.info('Preparing {} for ephemeral grader'.format(title))
 
         grader = eg.EphemeralGrader()
@@ -130,6 +129,7 @@ for p in problems():
 
             continue
 
+    if testConfig['solutions']:
         for solution in testConfig['solutions']:
             try:
                 name = solution['filename']
