@@ -13,8 +13,9 @@ name = "pypi"
 
 requests = ">=2.20.0"
 requests-toolbelt = "*"
+libkarel = "*"
 
 
 [requires]
 
-python_version = "3.5"
+python_version = "3.8"
