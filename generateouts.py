@@ -4,9 +4,9 @@ import os
 import sys
 import subprocess
 import re
-from problems import problems
 
 import compiler
+import problems
 
 def enumerateFullPath(path):
     if os.path.exists(path):
@@ -14,27 +14,25 @@ def enumerateFullPath(path):
     else:
         return []
 
+rootDirectory = problems.repositoryRoot()
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
 
 force = '--force' in sys.argv
 
-for p in problems():
-    path = p['path']
-    title = p['title']
+for p in problems.problems(allProblems='--all' in sys.argv):
+    logger.info('Generating outputs for problem: {}'.format(p.title))
 
-    logger.info('Generating outputs for problem: {}'.format(title))
-
-    if p.get('disabled', False):
-        logger.warn('Problem disabled.'.format(title))
+    if p.disabled:
+        logger.warn('Problem disabled.'.format(p.title))
         continue
 
-    with open(os.path.join(path, 'settings.json'), 'r') as pc:
+    with open(os.path.join(p.path, 'settings.json'), 'r') as pc:
         pConfig = json.loads(pc.read())
 
     if 'cases' in pConfig:
-        testplan = os.path.join(path, 'testplan')
+        testplan = os.path.join(p.path, 'testplan')
 
         logger.info('Generating testplan from settings.json.')
 
@@ -49,7 +47,7 @@ for p in problems():
                         case['name'], case['weight']
                     ))
 
-    generators = [x for x in os.listdir(path) if x.startswith('generator')]
+    generators = [x for x in os.listdir(p.path) if x.startswith('generator')]
 
     if not generators:
         logger.warn('No generator found! Skipping.')
@@ -59,14 +57,14 @@ for p in problems():
         logger.error('Found more than one generator!')
         sys.exit(1)
 
-    genPath = os.path.join(path, generators[0])
+    genPath = os.path.join(p.path, generators[0])
 
     with compiler.compile(genPath) as generator:
-        casesPath = os.path.join(path, 'cases')
-        examplesPath = os.path.join(path, 'examples')
-        statementsPath = os.path.join(path, 'statements')
+        casesPath = os.path.join(p.path, 'cases')
+        examplesPath = os.path.join(p.path, 'examples')
+        statementsPath = os.path.join(p.path, 'statements')
 
-        languages = pConfig['misc']['languages'] 
+        languages = pConfig['misc']['languages']
 
         # TODO: if karel, enforce examples
 
@@ -120,4 +118,4 @@ for p in problems():
                     generate(['kareljs', 'draw', "--output", f_in + '.png'] + dimOpts)
                     generate(['kareljs', 'draw', "--output", f_out + '.png', "--run", genPath] + dimOpts)
 
-    print('Success generating outputs for {}'.format(title))
+    print('Success generating outputs for {}'.format(p.title))

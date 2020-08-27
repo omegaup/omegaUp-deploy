@@ -12,7 +12,7 @@ class compile:
         if self.filename.endswith('.kp') or self.filename.endswith('.kj'):
             return ['kareljs', 'run', self.filename]
         elif self.filename.endswith('.py'):
-            return ['python', self.filename]
+            return ['python3', self.filename]
         elif self.filename.endswith('.cpp'):
             binary = './solution'
 
