@@ -4,29 +4,57 @@ import sys
 import subprocess
 import json
 
-def problems():
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
+from typing import List, NamedTuple, Optional
 
+
+class Problem(NamedTuple):
+    """Represents a single problem."""
+    path: str
+    title: str
+    disabled: bool
+
+
+def repositoryRoot() -> str:
+    """Returns the root directory of the project.
+
+    If this is a submodule, it gets the root of the top-level working tree.
+    """
+    return subprocess.check_output([
+        'git', 'rev-parse', '--show-superproject-working-tree',
+        '--show-toplevel'
+    ],
+                                   universal_newlines=True).strip().split()[0]
+
+
+def problems(allProblems: bool = False,
+             rootDirectory: Optional[str] = None) -> List[Problem]:
+    """Gets the list of problems that will be considered.
+
+    If `allProblems` is passed, all the problems that are declared in
+    `problems.json` will be returned. Otherwise, only those that have
+    differences with `upstream/master`.
+    """
     env = os.environ
+    if rootDirectory is None:
+        rootDirectory = repositoryRoot()
 
-    logger.info('Moving up one directory...')
-    os.chdir('..')
+    logging.info('Loading problems...')
 
-    logger.info('Loading problems...')
+    with open(os.path.join(rootDirectory, 'problems.json'), 'r') as p:
+        config = json.load(p)
 
-    with open('problems.json', 'r') as p:
-        config = json.loads(p.read())
+    configProblems: List[Problem] = []
+    for problem in config['problems']:
+        configProblems.append(
+            Problem(path=problem['path'],
+                    title=problem['title'],
+                    disabled=problem.get('disabled', False)))
 
-    problems = config['problems']
+    if allProblems:
+        logging.info('Loading everything as requested.')
+        return configProblems
 
-    if '--all' in sys.argv:
-        logger.info('Loading everything as requested.')
-        return problems
-
-    problems = []
-
-    logger.info('Loading git diff.')
+    logging.info('Loading git diff.')
 
     if env.get('TRAVIS_COMMIT_RANGE'):
         commitRange = env['TRAVIS_COMMIT_RANGE']
@@ -37,22 +65,18 @@ def problems():
     else:
         commitRange = 'origin/master...HEAD'
 
-    git = subprocess.Popen(
-        ["git", "diff", "--name-only", "--diff-filter=AMDR", commitRange],
-        stdout = subprocess.PIPE)
+    changes = subprocess.check_output(
+        ['git', 'diff', '--name-only', '--diff-filter=AMDR', commitRange],
+        cwd=rootDirectory,
+        universal_newlines=True)
 
-    git.wait()
-    changes = str(git.stdout.read().decode('utf8'))
+    problems: List[Problem] = []
+    for problem in configProblems:
+        logging.info('Loading %s.', problem.title)
 
-    for p in config['problems']:
-        path = p['path']
-        title = p['title']
-
-        logger.info('Loading {}.'.format(title))
-
-        if path in changes:
-            problems.append(p)
-        else:
-            logger.info('No changes. Skipping.')
+        if problem.path not in changes:
+            logging.info('No changes to %s. Skipping.', problem.title)
+            continue
+        problems.append(p)
 
     return problems

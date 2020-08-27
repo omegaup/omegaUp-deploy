@@ -3,11 +3,10 @@ import logging
 import os
 import sys
 import subprocess
-from problems import problems
 
 import compiler
 import ephemeralgrader as eg
-from problems import problems
+import problems
 
 class TestCaseFailure(Exception):
     pass
@@ -24,24 +23,21 @@ env = os.environ
 
 anyFailure = False
 
-for p in problems():
-    path = p['path']
-    title = p['title']
+for p in problems.problems(allProblems='--all' in sys.argv):
+    logger.info('Testing problem: {}'.format(p.title))
 
-    logger.info('Testing problem: {}'.format(title))
-
-    if p.get('disabled', False):
-        logger.warn('Problem disabled.'.format(title))
+    if p.disabled:
+        logger.warn('Problem %s disabled.', p.title)
         continue
 
-    with open(os.path.join(path, 'settings.json'), 'r') as pc:
+    with open(os.path.join(p.path, 'settings.json'), 'r') as pc:
         pConfig = json.loads(pc.read())
 
     if pConfig['misc']['languages'] == 'none':
         logger.warn('Skipping tests for no-submissions problem.')
         continue
 
-    testPath = os.path.join(path, 'tests')
+    testPath = os.path.join(p.path, 'tests')
     testConfigPath = os.path.join(testPath, 'tests.json')
 
     if not os.path.isfile(testConfigPath):
@@ -64,7 +60,7 @@ for p in problems():
         # the last argument to the checker is the name of the test case.
         checker.append('casename')
 
-        casesPath = os.path.join(path, 'cases')
+        casesPath = os.path.join(p.path, 'cases')
 
         for case in os.listdir(casesPath):
             try:
@@ -115,14 +111,14 @@ for p in problems():
                 if os.path.islink('data.out'):
                     os.remove('data.out')
 
-        logger.info('Preparing {} for ephemeral grader'.format(title))
+        logger.info('Preparing {} for ephemeral grader'.format(p.title))
 
         grader = eg.EphemeralGrader()
 
         try:
-            graderInput = grader.prepareInput(path, pConfig)
+            graderInput = grader.prepareInput(p.path, pConfig)
         except eg.InvalidProblemException as e:
-            print("Invalid problem format: {}".format(title))
+            print("Invalid problem format: {}".format(p.title))
             print(e)
 
             anyFailure = True
@@ -135,7 +131,7 @@ for p in problems():
                 name = solution['filename']
                 logger.info('Grading solution {}'.format(name))
 
-                solPath = os.path.join(path, 'tests', name)
+                solPath = os.path.join(p.path, 'tests', name)
                 with open(solPath, 'r') as contents:
                     source = contents.read()
 
@@ -234,7 +230,7 @@ for p in problems():
     else:
         logger.warning('No solutions to be tested!')
 
-    print('Results for {}'.format(title))
+    print('Results for {}'.format(p.title))
 
     if caseFailures:
         print('Failed test cases:')

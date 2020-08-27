@@ -8,7 +8,7 @@ from time import sleep
 
 import compiler
 from omegaUp import *
-from problems import problems
+import problems
 
 def enumerateFullPath(path):
     return [os.path.join(path, f) for f in os.listdir(path)]
@@ -20,10 +20,8 @@ logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
 oUp = omegaUp(env['OMEGAUPUSER'], env['OMEGAUPPASS'])
 oUp.login()
 
-for p in problems():
-    path = p['path']
-
-    with open(os.path.join(path, 'settings.json'), 'r') as pc:
+for p in problems.problems(allProblems='--all' in sys.argv):
+    with open(os.path.join(p.path, 'settings.json'), 'r') as pc:
         pConfig = json.loads(pc.read())
 
     title = pConfig['title']
@@ -40,28 +38,28 @@ for p in problems():
     with ZipFile(zipPath, 'w', compression=ZIP_DEFLATED) as archive:
         def addFile(f):
             logging.info('writing {}'.format(f))
-            archive.write(f, os.path.relpath(f, path))
+            archive.write(f, os.path.relpath(f, p.path))
 
         def recursiveAdd(directory):
-            for (dirpath, dirnames, filenames) in os.walk(os.path.join(path, directory)):
+            for (dirpath, dirnames, filenames) in os.walk(os.path.join(p.path, directory)):
                 for f in filenames:
                     addFile(os.path.join(dirpath, f))
 
-        testplan = os.path.join(path, 'testplan')
+        testplan = os.path.join(p.path, 'testplan')
 
         if os.path.isfile(testplan):
             logging.info('Adding testplan.')
             addFile(testplan)
 
         if pConfig['validator']['name'] == 'custom':
-            validators = [x for x in os.listdir(path) if x.startswith('validator')]
+            validators = [x for x in os.listdir(p.path) if x.startswith('validator')]
 
             if not validators:
                 raise Exception('Custom validator missing!')
             if len(validators) != 1:
                 raise Exception('More than one validator found!')
 
-            validator = os.path.join(path, validators[0])
+            validator = os.path.join(p.path, validators[0])
 
             addFile(validator)
 
@@ -73,7 +71,7 @@ for p in problems():
 
         recursiveAdd('cases')
 
-        if os.path.isdir(os.path.join(path, 'interactive')):
+        if os.path.isdir(os.path.join(p.path, 'interactive')):
             recursiveAdd('interactive')
 
     if env.get('TRAVIS'):
