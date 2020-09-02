@@ -10,6 +10,9 @@ import problems
 
 def _main() -> None:
     parser = argparse.ArgumentParser('Run tests')
+    parser.add_argument('--ci',
+                        action='store_true',
+                        help='Signal that this is being run from the CI.')
     parser.add_argument(
         '--all',
         action='store_true',
@@ -24,6 +27,14 @@ def _main() -> None:
     anyFailure = False
 
     rootDirectory = problems.repositoryRoot()
+
+    if args.ci:
+        # Since this is running on GitHub, downloading the image from the
+        # GitHub container registry is significantly faster.
+        containerName = 'docker.pkg.github.com/omegaup/quark/omegaup-runner-ci'
+    else:
+        # This does not require authentication.
+        containerName = 'omegaup/runner-ci'
 
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
@@ -40,7 +51,7 @@ def _main() -> None:
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
-            'docker.pkg.github.com/omegaup/quark/omegaup-runner-ci:v1.2.2',
+            f'{containerName}:v1.2.2',
             '-oneshot=ci',
             '-input',
             p.path,
