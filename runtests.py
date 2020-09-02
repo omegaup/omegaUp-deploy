@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import shutil
 import sys
 import subprocess
 
@@ -9,11 +10,16 @@ import problems
 
 
 def _main() -> None:
+    rootDirectory = problems.repositoryRoot()
+
     parser = argparse.ArgumentParser('Run tests')
     parser.add_argument(
         '--all',
         action='store_true',
         help='Consider all problems, instead of only those that have changed')
+    parser.add_argument('--results-directory',
+                        default=os.path.join(rootDirectory, 'results'),
+                        help='Directory to store the results of the runs')
     args = parser.parse_args()
 
     env = os.environ
@@ -23,7 +29,9 @@ def _main() -> None:
 
     anyFailure = False
 
-    rootDirectory = problems.repositoryRoot()
+    if os.path.isdir(args.results_directory):
+        shutil.rmtree(args.results_directory)
+    os.makedirs(args.results_directory)
 
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
@@ -33,7 +41,8 @@ def _main() -> None:
             logging.warn('Problem %s disabled. Skipping.', p.title)
             continue
 
-        resultsDirectory = os.path.join('results', p.path)
+        resultsDirectory = os.path.relpath(
+            os.path.join(args.results_directory, p.path), rootDirectory)
         processResult = subprocess.run([
             'docker',
             'run',
@@ -71,16 +80,22 @@ def _main() -> None:
                 if not expected:
                     # If there are no constraints, by default expect the run to be accepted.
                     expected['verdict'] = 'AC'
+                logsDir = os.path.join(resultsDirectory,
+                                       str(testResult['index']))
             else:
                 expected = {'verdict': 'AC'}
+                logsDir = os.path.join(resultsDirectory,
+                                       str(testResult['index']), 'validator')
             got = {
                 'verdict': testResult.get('result', {}).get('verdict'),
                 'score': testResult.get('result', {}).get('score'),
             }
+
             print(f'    {testResult["type"]:10} | '
                   f'{testResult["filename"][:40]:40} | '
                   f'{testResult["state"]:8} | '
-                  f'expected={expected} got={got}')
+                  f'expected={expected} got={got} | '
+                  f'logs at {logsDir}')
         print()
         print(f'    Full logs and report in {resultsDirectory}')
 
