@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import os
@@ -14,30 +15,42 @@ def enumerateFullPath(path):
     else:
         return []
 
-rootDirectory = problems.repositoryRoot()
-logger = logging.getLogger(__name__)
+parser = argparse.ArgumentParser('Run tests')
+parser.add_argument(
+    '--all',
+    action='store_true',
+    help='Consider all problems, instead of only those that have changed')
+args = parser.parse_args()
+
+env = os.environ
 
 logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
-force = '--force' in sys.argv
+anyFailure = False
 
-for p in problems.problems(allProblems='--all' in sys.argv):
-    logger.info('Generating outputs for problem: {}'.format(p.title))
+rootDirectory = problems.repositoryRoot()
+
+for p in problems.problems(allProblems=args.all,
+                           rootDirectory=rootDirectory):
+    logging.info('Generating outputs for problem: {}'.format(p.title))
 
     if p.disabled:
-        logger.warn('Problem disabled.'.format(p.title))
+        logging.warn('Problem disabled.'.format(p.title))
         continue
 
-    with open(os.path.join(p.path, 'settings.json'), 'r') as pc:
+    pPath = os.path.join('..', p.path)
+
+    with open(os.path.join(pPath, 'settings.json'), 'r') as pc:
         pConfig = json.loads(pc.read())
 
     if 'cases' in pConfig:
-        testplan = os.path.join(p.path, 'testplan')
+        testplan = os.path.join(pPath, 'testplan')
 
-        logger.info('Generating testplan from settings.json.')
+        logging.info('Generating testplan from settings.json.')
 
         if os.path.isfile(testplan):
-            logger.error('testplan cannot exist when settings.json has cases!')
+            logging.error('testplan cannot exist when settings.json has cases!')
             sys.exit(1)
 
         with open(testplan, 'w') as tp:
@@ -47,22 +60,22 @@ for p in problems.problems(allProblems='--all' in sys.argv):
                         case['name'], case['weight']
                     ))
 
-    generators = [x for x in os.listdir(p.path) if x.startswith('generator')]
+    generators = [x for x in os.listdir(pPath) if x.startswith('generator')]
 
     if not generators:
-        logger.warn('No generator found! Skipping.')
+        logging.warn('No generator found! Skipping.')
         # TODO: check .ins and .outs match
         continue
     if len(generators) != 1:
-        logger.error('Found more than one generator!')
+        logging.error('Found more than one generator!')
         sys.exit(1)
 
-    genPath = os.path.join(p.path, generators[0])
+    genPath = os.path.join(pPath, generators[0])
 
     with compiler.compile(genPath) as generator:
-        casesPath = os.path.join(p.path, 'cases')
-        examplesPath = os.path.join(p.path, 'examples')
-        statementsPath = os.path.join(p.path, 'statements')
+        casesPath = os.path.join(pPath, 'cases')
+        examplesPath = os.path.join(pPath, 'examples')
+        statementsPath = os.path.join(pPath, 'statements')
 
         languages = pConfig['misc']['languages']
 
@@ -86,7 +99,7 @@ for p in problems.problems(allProblems='--all' in sys.argv):
                         ".outs can't be present when generator.$lang$ exists: " + f_out)
 
                 with open(f_in, 'r') as in_file, open(f_out, 'w') as out_file:
-                    logger.info('Generating output for: ' + f_in)
+                    logging.info('Generating output for: ' + f_in)
 
                     ret = subprocess.call(generator,
                                           stdin=in_file,
@@ -97,10 +110,10 @@ for p in problems.problems(allProblems='--all' in sys.argv):
                         raise Exception("Model solution RTE!")
 
                 if languages == 'karel':
-                    logger.info('Generating pngs.')
+                    logging.info('Generating pngs.')
 
                     def generate(command):
-                        logger.info('Running command: ' + str(command))
+                        logging.info('Running command: ' + str(command))
 
                         with open(f_in, 'r') as in_file:
                             ret = subprocess.call(command,
