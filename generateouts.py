@@ -21,6 +21,9 @@ def _main() -> None:
         '--all',
         action='store_true',
         help='Consider all problems, instead of only those that have changed')
+    parser.add_argument('--force',
+                        action='store_true',
+                        help='Force re-generating all outputs')
     args = parser.parse_args()
 
     env = os.environ
@@ -95,7 +98,7 @@ def _main() -> None:
                 for f_in in ins:
                     f_out = f_in[:-3] + '.out'
 
-                    if not force and os.path.isfile(f_out):
+                    if not args.force and os.path.isfile(f_out):
                         raise Exception(
                             ".outs can't be present when generator.$lang$ exists: " + f_out)
 
