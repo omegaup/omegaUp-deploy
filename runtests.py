@@ -79,9 +79,6 @@ def _main() -> None:
             continue
 
         report = json.loads(processResult.stdout)
-        print(f'Results for {p.title}: {report["state"]}')
-        if report['state'] == 'passed':
-            continue
 
         anyFailure = True
         for testResult in report['tests']:
@@ -109,6 +106,8 @@ def _main() -> None:
                   f'logs at {logsDir}')
         print()
         print(f'    Full logs and report in {resultsDirectory}')
+
+        print(f'Results for {p.title}: {report["state"]}')
 
     if anyFailure:
         sys.exit(1)
