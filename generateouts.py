@@ -16,7 +16,7 @@ def enumerateFullPath(path):
         return []
 
 def _main() -> None:
-    parser = argparse.ArgumentParser('Run tests')
+    parser = argparse.ArgumentParser('Generate outputs')
     parser.add_argument(
         '--all',
         action='store_true',
@@ -43,7 +43,7 @@ def _main() -> None:
             logging.warning('Problem disabled.')
             continue
 
-        pPath = os.path.join('..', p.path)
+        pPath = os.path.join(rootDirectory, p.path)
 
         with open(os.path.join(pPath, 'settings.json'), 'r') as pc:
             pConfig = json.loads(pc.read())
