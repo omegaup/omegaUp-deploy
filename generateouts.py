@@ -34,7 +34,8 @@ def _main() -> None:
 
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
-        logging.info('Generating outputs for problem: {}'.format(p.title))
+        logging.error(str(p))
+        logging.info('Generating outputs for problem: %s', p.title)
 
         if p.disabled:
             logging.warn('Problem disabled.'.format(p.title))
