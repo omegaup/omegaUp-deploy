@@ -80,7 +80,9 @@ def _main() -> None:
 
         report = json.loads(processResult.stdout)
 
-        anyFailure = True
+        if report['state'] != 'passed':
+            anyFailure = True
+
         for testResult in report['tests']:
             if testResult['type'] == 'solutions':
                 expected = dict(testResult['solution'])
@@ -105,9 +107,9 @@ def _main() -> None:
                   f'expected={expected} got={got} | '
                   f'logs at {logsDir}')
         print()
-        print(f'    Full logs and report in {resultsDirectory}')
 
         print(f'Results for {p.title}: {report["state"]}')
+        print(f'    Full logs and report in {resultsDirectory}')
 
     if anyFailure:
         sys.exit(1)
