@@ -77,6 +77,6 @@ def problems(allProblems: bool = False,
         if problem.path not in changes:
             logging.info('No changes to %s. Skipping.', problem.title)
             continue
-        problems.append(p)
+        problems.append(problem)
 
     return problems

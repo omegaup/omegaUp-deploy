@@ -34,11 +34,10 @@ def _main() -> None:
 
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
-        logging.error(str(p))
         logging.info('Generating outputs for problem: %s', p.title)
 
         if p.disabled:
-            logging.warn('Problem disabled.'.format(p.title))
+            logging.warning('Problem disabled.')
             continue
 
         pPath = os.path.join('..', p.path)
@@ -65,7 +64,7 @@ def _main() -> None:
         generators = [x for x in os.listdir(pPath) if x.startswith('generator')]
 
         if not generators:
-            logging.warn('No generator found! Skipping.')
+            logging.warning('No generator found! Skipping.')
             # TODO: check .ins and .outs match
             continue
         if len(generators) != 1:
