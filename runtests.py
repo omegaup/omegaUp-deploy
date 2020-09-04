@@ -44,6 +44,14 @@ def _main() -> None:
         # This does not require authentication.
         containerName = 'omegaup/runner-ci'
 
+    taggedContainerName = f'{containerName}:v1.2.4'
+    if not subprocess.check_output(
+        ['docker', 'image', 'ls', '-q', taggedContainerName],
+            universal_newlines=True).strip():
+        logging.info('Downloading Docker image %s...', taggedContainerName)
+        subprocess.check_call(['docker', 'pull', taggedContainerName])
+
+
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
         logging.info('Testing problem: %s...', p.title)
@@ -60,7 +68,7 @@ def _main() -> None:
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
-            f'{containerName}:v1.2.2',
+            taggedContainerName,
             '-oneshot=ci',
             '-input',
             p.path,
