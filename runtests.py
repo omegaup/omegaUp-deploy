@@ -69,12 +69,18 @@ def _main() -> None:
 
         problemResultsDirectory = os.path.join(args.results_directory, p.path)
         os.makedirs(problemResultsDirectory)
+
+        # Make sure that the UID/GID that the container is running as matches
+        # the one outside. That way, the results can be written to disk.
+        uidMapping = (['--user', f'{os.getuid()}:{os.getgid()}']
+                      if os.name == 'posix' else [])
         processResult = subprocess.run([
             'docker',
             'run',
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
+        ] + uidMapping + [
             _getContainerName(args.ci),
             '-oneshot=ci',
             '-input',
