@@ -99,8 +99,12 @@ def _main() -> None:
             anyFailure = True
             continue
 
+        # The CI might have written a log, but the stderr contents have a few
+        # more things in it.
+        with open(os.path.join(problemResultsDirectory, 'ci.log'), 'w') as f:
+            f.write(processResult.stderr)
+
         report = json.loads(processResult.stdout)
-        logging.debug('Raw logs from container: %s', processResult.stderr)
 
         if report['state'] != 'passed':
             anyFailure = True
