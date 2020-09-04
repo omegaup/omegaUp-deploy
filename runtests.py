@@ -3,8 +3,9 @@ import json
 import logging
 import os
 import shutil
-import sys
 import subprocess
+import sys
+import textwrap
 
 import problems
 
@@ -20,6 +21,9 @@ def _main() -> None:
         '--all',
         action='store_true',
         help='Consider all problems, instead of only those that have changed')
+    parser.add_argument('--verbose',
+                        action='store_true',
+                        help='Verbose logging')
     parser.add_argument('--results-directory',
                         default=os.path.join(rootDirectory, 'results'),
                         help='Directory to store the results of the runs')
@@ -27,7 +31,8 @@ def _main() -> None:
 
     env = os.environ
 
-    logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s: %(message)s',
+                        level=logging.DEBUG if args.verbose else logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
     anyFailure = False
@@ -88,11 +93,11 @@ def _main() -> None:
 
         report = json.loads(processResult.stdout)
 
-        logging.debug(report)
+        logging.debug(json.dumps(report, sort_keys=True, indent=2))
 
         if report['state'] != 'passed':
             anyFailure = True
-        
+
         if report['state'] == 'skipped':
             logging.error('Skipped. (tests/tests.json, settings.json, or testplan are probably missing or invalid.)')
 
@@ -119,18 +124,17 @@ def _main() -> None:
                   f'{testResult["state"]:8} | '
                   f'expected={expected} got={got} | '
                   f'logs at {logsDir}')
-            
-            validatorStderrPath = os.path.join(resultsDirectory,
-                                               str(testResult['index']),
-                                               'validator',
-                                               str(testResult['index'])+'.err')
-            
-            print(testResult)
-            print(f'{validatorStderrPath}:')
-            if os.path.isfile(validatorStderrPath):
-                with open(validatorStderrPath, 'r') as out:
-                    print(out)
-            
+
+            if testResult['state'] != 'passed':
+                logging.debug(json.dumps(testResult, sort_keys=True, indent=2))
+                for stderrFilename in os.listdir(logsDir):
+                    if not stderrFilename.endswith('.err'):
+                        continue
+                    print(f'{stderrFilename}:')
+                    with open(os.path.join(logsDir, stderrFilename),
+                              'r') as out:
+                        print(textwrap.indent(out.read(), '    '))
+
         print()
 
         print(f'Results for {p.title}: {report["state"]}')
