@@ -93,8 +93,6 @@ def _main() -> None:
 
         report = json.loads(processResult.stdout)
 
-        logging.debug(json.dumps(report, sort_keys=True, indent=2))
-
         if report['state'] != 'passed':
             anyFailure = True
 
@@ -130,7 +128,6 @@ def _main() -> None:
                   f'logs at {relativeLogsDir}')
 
             if testResult['state'] != 'passed':
-                logging.debug(json.dumps(testResult, sort_keys=True, indent=2))
                 logsDir = os.path.join(rootDirectory, relativeLogsDir)
                 for stderrFilename in os.listdir(logsDir):
                     if not stderrFilename.endswith('.err'):
