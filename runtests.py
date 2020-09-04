@@ -86,7 +86,7 @@ def _main() -> None:
             anyFailure = True
         
         if report['state'] == 'skipped':
-            logging.error('Skipped. (tests/tests.json or settings.json are probably missing or invalid.)')
+            logging.error('Skipped. (tests/tests.json, settings.json, or testplan are probably missing or invalid.)')
 
         for testResult in report['tests']:
             if testResult['type'] == 'solutions':
