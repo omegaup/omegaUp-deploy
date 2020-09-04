@@ -140,7 +140,7 @@ def _main() -> None:
                                   'r') as out:
                             print(textwrap.indent(out.read(), '    '))
                 else:
-                    logging.warn('Logs directory %r not found.', logsDirectory)
+                    logging.warning('Logs directory %r not found.', logsDirectory)
 
         print()
 
