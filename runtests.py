@@ -115,10 +115,10 @@ def _main() -> None:
             validatorStderrPath = os.path.join(resultsDirectory,
                                                str(testResult['index']),
                                                'validator',
-                                               f'{str(testResult['index'])}.err')
+                                               str(testResult['index'])+'.err')
             
             if os.path.isfile(validatorStderrPath):
-                print('validatorStderrPath:')
+                print(f'{validatorStderrPath}:')
                 with open(validatorStderrPath, 'r') as out:
                     print(out)
             
