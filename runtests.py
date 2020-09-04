@@ -56,7 +56,6 @@ def _main() -> None:
         logging.info('Downloading Docker image %s...', taggedContainerName)
         subprocess.check_call(['docker', 'pull', taggedContainerName])
 
-
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
         logging.info('Testing problem: %s...', p.title)
@@ -65,8 +64,8 @@ def _main() -> None:
             logging.warn('Problem %s disabled. Skipping.', p.title)
             continue
 
-        resultsDirectory = os.path.relpath(
-            os.path.join(args.results_directory, p.path), rootDirectory)
+        problemResultsDirectory = os.path.join(args.results_directory, p.path)
+        os.makedirs(problemResultsDirectory)
         processResult = subprocess.run([
             'docker',
             'run',
@@ -78,7 +77,7 @@ def _main() -> None:
             '-input',
             p.path,
             '-results',
-            resultsDirectory,
+            os.path.relpath(problemResultsDirectory, rootDirectory),
         ],
                                        universal_newlines=True,
                                        stdout=subprocess.PIPE,
@@ -92,6 +91,7 @@ def _main() -> None:
             continue
 
         report = json.loads(processResult.stdout)
+        logging.debug('Raw logs from container: %s', processResult.stderr)
 
         if report['state'] != 'passed':
             anyFailure = True
@@ -109,13 +109,13 @@ def _main() -> None:
                 if not expected:
                     # If there are no constraints, by default expect the run to be accepted.
                     expected['verdict'] = 'AC'
-                relativeLogsDir = os.path.join(resultsDirectory,
-                                               str(testResult['index']))
+                logsDirectory = os.path.join(problemResultsDirectory,
+                                             str(testResult['index']))
             else:
                 expected = {'verdict': 'AC'}
-                relativeLogsDir = os.path.join(resultsDirectory,
-                                               str(testResult['index']),
-                                               'validator')
+                logsDirectory = os.path.join(problemResultsDirectory,
+                                             str(testResult['index']),
+                                             'validator')
             got = {
                 'verdict': testResult.get('result', {}).get('verdict'),
                 'score': testResult.get('result', {}).get('score'),
@@ -125,22 +125,24 @@ def _main() -> None:
                   f'{testResult["filename"][:40]:40} | '
                   f'{testResult["state"]:8} | '
                   f'expected={expected} got={got} | '
-                  f'logs at {relativeLogsDir}')
+                  f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
 
             if testResult['state'] != 'passed':
-                logsDir = os.path.join(rootDirectory, relativeLogsDir)
-                for stderrFilename in os.listdir(logsDir):
-                    if not stderrFilename.endswith('.err'):
-                        continue
-                    print(f'{stderrFilename}:')
-                    with open(os.path.join(logsDir, stderrFilename),
-                              'r') as out:
-                        print(textwrap.indent(out.read(), '    '))
+                if os.path.isdir(logsDirectory):
+                    for stderrFilename in os.listdir(logsDirectory):
+                        if not stderrFilename.endswith('.err'):
+                            continue
+                        print(f'{stderrFilename}:')
+                        with open(os.path.join(logsDirectory, stderrFilename),
+                                  'r') as out:
+                            print(textwrap.indent(out.read(), '    '))
+                else:
+                    logging.warn('Logs directory %r not found.', logsDirectory)
 
         print()
 
         print(f'Results for {p.title}: {report["state"]}')
-        print(f'    Full logs and report in {resultsDirectory}')
+        print(f'    Full logs and report in {problemResultsDirectory}')
 
     if anyFailure:
         sys.exit(1)
