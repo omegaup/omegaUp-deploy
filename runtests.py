@@ -99,21 +99,25 @@ def _main() -> None:
             anyFailure = True
 
         if report['state'] == 'skipped':
-            logging.error('Skipped. (tests/tests.json, settings.json, or testplan are probably missing or invalid.)')
+            logging.error(
+                'Skipped. (tests/tests.json, settings.json, or testplan are probably missing or invalid.)'
+            )
+            continue
 
-        for testResult in report['tests']:
+        for testResult in report.get('tests', []):
             if testResult['type'] == 'solutions':
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
                 if not expected:
                     # If there are no constraints, by default expect the run to be accepted.
                     expected['verdict'] = 'AC'
-                logsDir = os.path.join(resultsDirectory,
-                                       str(testResult['index']))
+                relativeLogsDir = os.path.join(resultsDirectory,
+                                               str(testResult['index']))
             else:
                 expected = {'verdict': 'AC'}
-                logsDir = os.path.join(resultsDirectory,
-                                       str(testResult['index']), 'validator')
+                relativeLogsDir = os.path.join(resultsDirectory,
+                                               str(testResult['index']),
+                                               'validator')
             got = {
                 'verdict': testResult.get('result', {}).get('verdict'),
                 'score': testResult.get('result', {}).get('score'),
@@ -123,10 +127,11 @@ def _main() -> None:
                   f'{testResult["filename"][:40]:40} | '
                   f'{testResult["state"]:8} | '
                   f'expected={expected} got={got} | '
-                  f'logs at {logsDir}')
+                  f'logs at {relativeLogsDir}')
 
             if testResult['state'] != 'passed':
                 logging.debug(json.dumps(testResult, sort_keys=True, indent=2))
+                logsDir = os.path.join(rootDirectory, relativeLogsDir)
                 for stderrFilename in os.listdir(logsDir):
                     if not stderrFilename.endswith('.err'):
                         continue
