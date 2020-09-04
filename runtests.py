@@ -80,10 +80,13 @@ def _main() -> None:
 
         report = json.loads(processResult.stdout)
 
-        print(report, file=sys.stderr)
+        logging.debug(report)
 
         if report['state'] != 'passed':
             anyFailure = True
+        
+        if report['state'] == 'skipped':
+            logging.error('Skipped. (tests/tests.json or settings.json are probably missing or invalid.)')
 
         for testResult in report['tests']:
             if testResult['type'] == 'solutions':
