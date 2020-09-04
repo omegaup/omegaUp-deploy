@@ -69,18 +69,22 @@ def _main() -> None:
 
         problemResultsDirectory = os.path.join(args.results_directory, p.path)
         os.makedirs(problemResultsDirectory)
+        # The results are written with the container's UID, which does not
+        # necessarily match the caller's UID. To avoid that problem, we create
+        # the results directory with very lax permissions so that the container
+        # can write it.
+        os.chmod(problemResultsDirectory, 0o777)
+        with open(os.path.join(problemResultsDirectory, 'ci.log'), 'w') as f:
+            pass
+        # Also make the ci log's permissions very lax.
+        os.chmod(os.path.join(problemResultsDirectory, 'ci.log'), 0o666)
 
-        # Make sure that the UID/GID that the container is running as matches
-        # the one outside. That way, the results can be written to disk.
-        uidMapping = (['--user', f'{os.getuid()}:{os.getgid()}']
-                      if os.name == 'posix' else [])
         processResult = subprocess.run([
             'docker',
             'run',
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
-        ] + uidMapping + [
             _getContainerName(args.ci),
             '-oneshot=ci',
             '-input',
