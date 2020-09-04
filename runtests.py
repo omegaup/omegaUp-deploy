@@ -80,7 +80,7 @@ def _main() -> None:
 
         report = json.loads(processResult.stdout)
 
-        sys.stderr.print(report)
+        print(report, file=sys.stderr)
 
         if report['state'] != 'passed':
             anyFailure = True
