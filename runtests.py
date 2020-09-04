@@ -117,8 +117,9 @@ def _main() -> None:
                                                'validator',
                                                str(testResult['index'])+'.err')
             
+            print(testResult)
+            print(f'{validatorStderrPath}:')
             if os.path.isfile(validatorStderrPath):
-                print(f'{validatorStderrPath}:')
                 with open(validatorStderrPath, 'r') as out:
                     print(out)
             
