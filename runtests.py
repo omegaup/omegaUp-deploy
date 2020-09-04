@@ -111,6 +111,17 @@ def _main() -> None:
                   f'{testResult["state"]:8} | '
                   f'expected={expected} got={got} | '
                   f'logs at {logsDir}')
+            
+            validatorStderrPath = os.path.join(resultsDirectory,
+                                               str(testResult['index']),
+                                               'validator',
+                                               f'{str(testResult['index'])}.err')
+            
+            if os.path.isfile(validatorStderrPath):
+                print('validatorStderrPath:')
+                with open(validatorStderrPath, 'r') as out:
+                    print(out)
+            
         print()
 
         print(f'Results for {p.title}: {report["state"]}')
