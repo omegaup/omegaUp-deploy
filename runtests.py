@@ -9,6 +9,24 @@ import textwrap
 
 import problems
 
+def _getContainerName(ci: bool) -> str:
+    """Ensures the container is present in the expected version."""
+    if ci:
+        # Since this is running on GitHub, downloading the image from the
+        # GitHub container registry is significantly faster.
+        containerName = 'docker.pkg.github.com/omegaup/quark/omegaup-runner-ci'
+    else:
+        # This does not require authentication.
+        containerName = 'omegaup/runner-ci'
+
+    taggedContainerName = f'{containerName}:v1.2.4'
+    if not subprocess.check_output(
+        ['docker', 'image', 'ls', '-q', taggedContainerName],
+            universal_newlines=True).strip():
+        logging.info('Downloading Docker image %s...', taggedContainerName)
+        subprocess.check_call(['docker', 'pull', taggedContainerName])
+    return taggedContainerName
+
 
 def _main() -> None:
     rootDirectory = problems.repositoryRoot()
@@ -41,28 +59,13 @@ def _main() -> None:
         shutil.rmtree(args.results_directory)
     os.makedirs(args.results_directory)
 
-    if args.ci:
-        # Since this is running on GitHub, downloading the image from the
-        # GitHub container registry is significantly faster.
-        containerName = 'docker.pkg.github.com/omegaup/quark/omegaup-runner-ci'
-    else:
-        # This does not require authentication.
-        containerName = 'omegaup/runner-ci'
-
-    taggedContainerName = f'{containerName}:v1.2.4'
-    if not subprocess.check_output(
-        ['docker', 'image', 'ls', '-q', taggedContainerName],
-            universal_newlines=True).strip():
-        logging.info('Downloading Docker image %s...', taggedContainerName)
-        subprocess.check_call(['docker', 'pull', taggedContainerName])
-
     for p in problems.problems(allProblems=args.all,
                                rootDirectory=rootDirectory):
-        logging.info('Testing problem: %s...', p.title)
-
         if p.disabled:
             logging.warn('Problem %s disabled. Skipping.', p.title)
             continue
+
+        logging.info('Testing problem: %s...', p.title)
 
         problemResultsDirectory = os.path.join(args.results_directory, p.path)
         os.makedirs(problemResultsDirectory)
@@ -72,7 +75,7 @@ def _main() -> None:
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
-            taggedContainerName,
+            _getContainerName(args.ci),
             '-oneshot=ci',
             '-input',
             p.path,
