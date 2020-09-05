@@ -45,6 +45,9 @@ def _main() -> None:
     parser.add_argument('--results-directory',
                         default=os.path.join(rootDirectory, 'results'),
                         help='Directory to store the results of the runs')
+    parser.add_argument('--only-pull-image',
+                        action='store_true',
+                        help='Don\'t run tests: only download the Docker container')
     args = parser.parse_args()
 
     env = os.environ
@@ -52,6 +55,10 @@ def _main() -> None:
     logging.basicConfig(format='%(asctime)s: %(message)s',
                         level=logging.DEBUG if args.verbose else logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+
+    if args.only_pull_image:
+        _getContainerName()
+        sys.exit(0)
 
     anyFailure = False
 
@@ -138,28 +145,33 @@ def _main() -> None:
                 'score': testResult.get('result', {}).get('score'),
             }
 
-            print(f'    {testResult["type"]:10} | '
-                  f'{testResult["filename"][:40]:40} | '
-                  f'{testResult["state"]:8} | '
-                  f'expected={expected} got={got} | '
-                  f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
-
+            logger.info(f'    {testResult["type"]:10} | '
+                        f'{testResult["filename"][:40]:40} | '
+                        f'{testResult["state"]:8} | '
+                        f'expected={expected} got={got} | '
+                        f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
+            
             if testResult['state'] != 'passed':
+                failedCases = set(c['name'] for g in testResult['groups']
+                                            for c in g['cases']
+                                            if c['verdict'] != 'AC')
+
                 if os.path.isdir(logsDirectory):
                     for stderrFilename in os.listdir(logsDirectory):
                         if not stderrFilename.endswith('.err'):
                             continue
-                        print(f'{stderrFilename}:')
+                        if not os.path.splitext(stderrFilename)[0] in failedCases:
+                            continue
+
+                        logger.info(f'{stderrFilename}:')
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
-                            print(textwrap.indent(out.read(), '    '))
+                            logger.info(textwrap.indent(out.read(), '    '))
                 else:
                     logging.warning('Logs directory %r not found.', logsDirectory)
 
-        print()
-
-        print(f'Results for {p.title}: {report["state"]}')
-        print(f'    Full logs and report in {problemResultsDirectory}')
+        logger.info(f'Results for {p.title}: {report["state"]}')
+        logger.info(f'    Full logs and report in {problemResultsDirectory}')
 
     if anyFailure:
         sys.exit(1)
