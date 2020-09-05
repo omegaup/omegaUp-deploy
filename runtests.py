@@ -145,11 +145,11 @@ def _main() -> None:
                 'score': testResult.get('result', {}).get('score'),
             }
 
-            logger.info(f'    {testResult["type"]:10} | '
-                        f'{testResult["filename"][:40]:40} | '
-                        f'{testResult["state"]:8} | '
-                        f'expected={expected} got={got} | '
-                        f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
+            logging.info(f'    {testResult["type"]:10} | '
+                         f'{testResult["filename"][:40]:40} | '
+                         f'{testResult["state"]:8} | '
+                         f'expected={expected} got={got} | '
+                         f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
             
             if testResult['state'] != 'passed':
                 failedCases = set(c['name'] for g in testResult['groups']
@@ -163,15 +163,15 @@ def _main() -> None:
                         if not os.path.splitext(stderrFilename)[0] in failedCases:
                             continue
 
-                        logger.info(f'{stderrFilename}:')
+                        logging.info(f'{stderrFilename}:')
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
-                            logger.info(textwrap.indent(out.read(), '    '))
+                            logging.info(textwrap.indent(out.read(), '    '))
                 else:
                     logging.warning('Logs directory %r not found.', logsDirectory)
 
-        logger.info(f'Results for {p.title}: {report["state"]}')
-        logger.info(f'    Full logs and report in {problemResultsDirectory}')
+        logging.info(f'Results for {p.title}: {report["state"]}')
+        logging.info(f'    Full logs and report in {problemResultsDirectory}')
 
     if anyFailure:
         sys.exit(1)
