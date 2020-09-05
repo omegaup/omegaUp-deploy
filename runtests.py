@@ -57,7 +57,7 @@ def _main() -> None:
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
     if args.only_pull_image:
-        _getContainerName()
+        _getContainerName(args.ci)
         sys.exit(0)
 
     anyFailure = False
