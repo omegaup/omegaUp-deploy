@@ -122,6 +122,7 @@ def _main() -> None:
                             with open(f_in, 'r') as in_file:
                                 ret = subprocess.call(command,
                                                       stdin=in_file,
+                                                      stderr=subprocess.DEVNULL,
                                                       timeout=10)
 
                             if ret != 0:
