@@ -152,7 +152,7 @@ def _main() -> None:
                          f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
             
             if testResult['state'] != 'passed':
-                failedCases = set(c['name'] for g in testResult['groups']
+                failedCases = set(c['name'] for g in testResult['result']['groups']
                                             for c in g['cases']
                                             if c['verdict'] != 'AC')
 
