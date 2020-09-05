@@ -122,7 +122,7 @@ def _main() -> None:
                             with open(f_in, 'r') as in_file:
                                 ret = subprocess.call(command,
                                                       stdin=in_file,
-                                                      timeout=5)
+                                                      timeout=10)
 
                             if ret != 0:
                                 raise Exception("png creation failure!")
