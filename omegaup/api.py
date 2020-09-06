@@ -168,8 +168,8 @@ class Problem:
 
 class API:
     def __init__(self,
+                 username: str,
                  *,
-                 username: Optional[str] = None,
                  password: Optional[str] = None,
                  auth_token: Optional[str] = None,
                  url: str = 'https://omegaup.com') -> None:
@@ -208,7 +208,7 @@ class API:
             payload['ouat'] = self.auth_token
 
         r = requests.post(urllib.parse.urljoin(self._url, endpoint),
-                          params=payload,
+                          data=payload,
                           files=files,
                           timeout=timeout.total_seconds())
 

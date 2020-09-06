@@ -7,6 +7,8 @@ import subprocess
 import sys
 import textwrap
 
+from typing import List
+
 import container
 import problems
 
