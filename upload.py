@@ -6,7 +6,6 @@ import subprocess
 from zipfile import *
 from time import sleep
 
-import compiler
 from omegaUp import *
 import problems
 

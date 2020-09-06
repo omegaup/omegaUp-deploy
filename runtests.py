@@ -7,25 +7,8 @@ import subprocess
 import sys
 import textwrap
 
+import container
 import problems
-
-def _getContainerName(ci: bool) -> str:
-    """Ensures the container is present in the expected version."""
-    if ci:
-        # Since this is running on GitHub, downloading the image from the
-        # GitHub container registry is significantly faster.
-        containerName = 'docker.pkg.github.com/omegaup/quark/omegaup-runner-ci'
-    else:
-        # This does not require authentication.
-        containerName = 'omegaup/runner-ci'
-
-    taggedContainerName = f'{containerName}:v1.2.4'
-    if not subprocess.check_output(
-        ['docker', 'image', 'ls', '-q', taggedContainerName],
-            universal_newlines=True).strip():
-        logging.info('Downloading Docker image %s...', taggedContainerName)
-        subprocess.check_call(['docker', 'pull', taggedContainerName])
-    return taggedContainerName
 
 
 def _main() -> None:
@@ -57,7 +40,7 @@ def _main() -> None:
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
     if args.only_pull_image:
-        _getContainerName(args.ci)
+        container.getImageName(args.ci)
         sys.exit(0)
 
     anyFailure = False
@@ -92,7 +75,7 @@ def _main() -> None:
             '--rm',
             '--volume',
             f'{rootDirectory}:/src',
-            _getContainerName(args.ci),
+            container.getImageName(args.ci),
             '-oneshot=ci',
             '-input',
             p.path,
@@ -150,7 +133,7 @@ def _main() -> None:
                          f'{testResult["state"]:8} | '
                          f'expected={expected} got={got} | '
                          f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
-            
+
             if testResult['state'] != 'passed':
                 failedCases = set(c['name'] for g in testResult['result']['groups']
                                             for c in g['cases']
