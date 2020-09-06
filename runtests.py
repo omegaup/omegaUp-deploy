@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import argparse
 import json
 import logging
@@ -34,8 +35,6 @@ def _main() -> None:
                         action='store_true',
                         help='Don\'t run tests: only download the Docker container')
     args = parser.parse_args()
-
-    env = os.environ
 
     logging.basicConfig(format='%(asctime)s: %(message)s',
                         level=logging.DEBUG if args.verbose else logging.INFO)

@@ -4,9 +4,7 @@ import sys
 import subprocess
 import json
 
-from typing import Any, List, Mapping, NamedTuple, NoReturn, Optional
-
-import omegaup.api
+from typing import List, NamedTuple, NoReturn, Optional
 
 class Problem(NamedTuple):
     """Represents a single problem."""

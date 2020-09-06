@@ -1,13 +1,10 @@
+#!/usr/bin/python3
 import argparse
 import datetime
 import json
 import logging
 import os
-import sys
-import subprocess
 import re
-
-from typing import List
 
 import container
 import problems
@@ -30,13 +27,9 @@ def _main() -> None:
                         help='Verbose logging')
     args = parser.parse_args()
 
-    env = os.environ
-
     logging.basicConfig(format='%(asctime)s: %(message)s',
                         level=logging.DEBUG if args.verbose else logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
-
-    anyFailure = False
 
     rootDirectory = problems.repositoryRoot()
 
