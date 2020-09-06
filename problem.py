@@ -2,11 +2,10 @@ import yaml
 import os
 import subprocess
 import logging
+import zipfile
 
-from zipfile import *
+import problems
 
-def enumerateFullPath(path):
-        return [os.path.join(path, f) for f in os.listdir(path)]
 
 class Problem:
     def __init__(self, path):
@@ -41,7 +40,10 @@ class Problem:
 
     def prepareZip(self, zipPath):
         if self.languages != 'none':
-            ins = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.in')]
+            ins = [
+                f for f in problems.enumerateFullPath(
+                    os.path.join(self.path, 'cases')) if f.endswith('.in')
+            ]
             outs = []
 
             if not ins:
@@ -90,7 +92,10 @@ class Problem:
                 if self.languages != 'karel':
                     os.remove('solution')
             else:
-                outs = [f for f in enumerateFullPath(os.path.join(self.path, 'cases')) if f.endswith('.out')]
+                outs = [
+                    f for f in problems.enumerateFullPath(
+                        os.path.join(self.path, 'cases')) if f.endswith('.out')
+                ]
 
             missing_outs = [i for i in ins if i[:-3] + '.out' not in outs]
 
@@ -103,7 +108,9 @@ class Problem:
         if self.languages == 'karel' and not os.path.isfile(karelSample):
             raise Exception("Karel problems need an example file at examples/sample.in.")
 
-        with ZipFile(zipPath, 'w', compression = ZIP_DEFLATED) as archive:
+        with zipfile.ZipFile(zipPath, 'w',
+                             compression=zipfile.ZIP_DEFLATED) as archive:
+
             def addFile(path):
                 archive.write(path, os.path.relpath(path, self.path))
 

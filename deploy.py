@@ -30,7 +30,7 @@ path = args.path[0]
 problemPath, problemDir = os.path.split(path)
 
 if args.onlychanges:
-    commitRange = None
+    commitRange = ''
 
     if env.get('TRAVIS'):
         commitRange = env['TRAVIS_COMMIT_RANGE']
@@ -79,7 +79,7 @@ else:
     commit = 'XXXXXX'
 
 message = 'Deployed automatically from commit ' + commit
-oUp.uploadProblem(problem, zipName, message)
+oUp.uploadProblem(problem, True, zipName, message)
 
 os.remove(zipName)
 

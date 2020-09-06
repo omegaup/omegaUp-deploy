@@ -4,7 +4,7 @@ import sys
 import subprocess
 import json
 
-from typing import List, NamedTuple, Optional
+from typing import List, NamedTuple, NoReturn, Optional
 
 
 class Problem(NamedTuple):
@@ -24,6 +24,54 @@ def repositoryRoot() -> str:
         '--show-toplevel'
     ],
                                    universal_newlines=True).strip().split()[0]
+
+
+def enumerateFullPath(path: str) -> List[str]:
+    """Returns a list of full paths for the files in `path`."""
+    if not os.path.exists(path):
+        return []
+    return [os.path.join(path, f) for f in os.listdir(path)]
+
+
+def ci_error(message: str,
+             *,
+             filename: Optional[str] = None,
+             line: Optional[int] = None,
+             col: Optional[int] = None) -> None:
+    """Show an error message, only on the CI."""
+    location = []
+    if filename is not None:
+        location.append(f'file={filename}')
+    if line is not None:
+        location.append(f'line={line}')
+    if col is not None:
+        location.append(f'col={col}')
+    print(
+        f'::error {",".join(location)}::' +
+        message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+
+
+def error(message: str,
+          *,
+          filename: Optional[str] = None,
+          line: Optional[int] = None,
+          col: Optional[int] = None,
+          ci: bool = False) -> None:
+    """Show an error message."""
+    if ci:
+        ci_error(message, filename=filename, line=line, col=col)
+    logging.error(message)
+
+
+def fatal(message: str,
+          *,
+          filename: Optional[str] = None,
+          line: Optional[int] = None,
+          col: Optional[int] = None,
+          ci: bool = False) -> NoReturn:
+    """Show a fatal message and exit."""
+    error(message, filename=filename, line=line, col=col, ci=ci)
+    sys.exit(1)
 
 
 def problems(allProblems: bool = False,

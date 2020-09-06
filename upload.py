@@ -9,9 +9,6 @@ from time import sleep
 from omegaUp import *
 import problems
 
-def enumerateFullPath(path):
-    return [os.path.join(path, f) for f in os.listdir(path)]
-
 env = os.environ
 
 logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)

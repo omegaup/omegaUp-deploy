@@ -13,12 +13,6 @@ import container
 import problems
 
 
-def enumerateFullPath(path: str) -> List[str]:
-    if not os.path.exists(path):
-        return []
-    return [os.path.join(path, f) for f in os.listdir(path)]
-
-
 def _main() -> None:
     parser = argparse.ArgumentParser('Generate outputs')
     parser.add_argument(
@@ -55,8 +49,9 @@ def _main() -> None:
             continue
 
         pPath = os.path.join(rootDirectory, p.path)
+        pConfigPath = os.path.join(pPath, 'settings.json')
 
-        with open(os.path.join(pPath, 'settings.json'), 'r') as pc:
+        with open(pConfigPath, 'r') as pc:
             pConfig = json.load(pc)
 
         if 'cases' in pConfig:
@@ -65,9 +60,10 @@ def _main() -> None:
             logging.info('Generating testplan from settings.json.')
 
             if os.path.isfile(testplan):
-                logging.error(
-                    'testplan cannot exist when settings.json has cases!')
-                sys.exit(1)
+                problems.fatal(
+                    'testplan cannot exist when settings.json has cases!',
+                    filename=testplan,
+                    ci=args.ci)
 
             with open(testplan, 'w') as tp:
                 for group in pConfig['cases']:
@@ -88,8 +84,9 @@ def _main() -> None:
             # TODO: check .ins and .outs match
             continue
         if len(generators) != 1:
-            logging.error('Found more than one generator! %s', generators)
-            sys.exit(1)
+            problems.fatal(f'Found more than one generator! {generators}',
+                           filename=pConfigPath,
+                           ci=args.ci)
 
         genPath = os.path.join(pPath, generators[0])
 
@@ -97,21 +94,25 @@ def _main() -> None:
         with container.Compile(sourcePath=genPath, ci=args.ci) as c:
             inFilenames = [
                 f for subdirectory in ('cases', 'examples', 'statements')
-                for f in enumerateFullPath(os.path.join(pPath, subdirectory))
-                if f.endswith('.in')
+                for f in problems.enumerateFullPath(
+                    os.path.join(pPath, subdirectory)) if f.endswith('.in')
             ]
 
             if not inFilenames:
-                raise Exception('No test cases found!')
+                problems.fatal(f'No test cases found for {p.title}!',
+                               filename=pConfigPath,
+                               ci=args.ci)
 
             for inFilename in inFilenames:
                 outFilename = f'{os.path.splitext(inFilename)[0]}.out'
                 logging.debug('Generating output for %s', inFilename)
 
                 if not args.force and os.path.isfile(outFilename):
-                    raise Exception(
-                        f".outs can't be present when generator.$lang$ exists: {outFilename}"
-                    )
+                    problems.fatal(
+                        f".outs can't be present when "
+                        f"generator.$lang$ exists: {outFilename}",
+                        filename=outFilename,
+                        ci=args.ci)
 
                 c.run(inFilename,
                       outFilename,

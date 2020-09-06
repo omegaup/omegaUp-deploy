@@ -88,8 +88,8 @@ def _main() -> None:
                                        cwd=rootDirectory)
 
         if processResult.returncode != 0:
-            logging.error(f'Failed to run %s:\n%s', p.title,
-                          processResult.stderr)
+            problems.error(f'Failed to run {p.title}:\n{processResult.stderr}',
+                           filename=os.path.join(p.path, 'settings.json'))
             anyFailure = True
             continue
 
@@ -104,9 +104,11 @@ def _main() -> None:
             anyFailure = True
 
         if report['state'] == 'skipped':
-            logging.error(
-                'Skipped. (tests/tests.json, settings.json, or testplan are probably missing or invalid.)'
-            )
+            problems.error(
+                f'Skipped {p.title}:\n'
+                'tests/tests.json, settings.json, or testplan are '
+                'probably missing or invalid.',
+                filename=os.path.join(p.path, 'settings.json'))
             continue
 
         for testResult in report.get('tests', []):
@@ -135,23 +137,34 @@ def _main() -> None:
                          f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
 
             if testResult['state'] != 'passed':
-                failedCases = set(c['name'] for g in testResult['result']['groups']
-                                            for c in g['cases']
-                                            if c['verdict'] != 'AC')
+                failedCases = {
+                    c['name']
+                    for g in testResult['result']['groups'] for c in g['cases']
+                    if c['verdict'] != 'AC'
+                }
+                failureMessages: List[str] = []
 
                 if os.path.isdir(logsDirectory):
-                    for stderrFilename in os.listdir(logsDirectory):
+                    for stderrFilename in sorted(os.listdir(logsDirectory)):
                         if not stderrFilename.endswith('.err'):
                             continue
                         if not os.path.splitext(stderrFilename)[0] in failedCases:
                             continue
 
-                        logging.info(f'{stderrFilename}:')
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
-                            logging.info(textwrap.indent(out.read(), '    '))
+                            failureMessage = f"{stderrFilename}:\n{textwrap.indent(out.read(), '    ')}"
+                            logging.info(failureMessage)
+                            failureMessages.append(failureMessage)
                 else:
                     logging.warning('Logs directory %r not found.', logsDirectory)
+
+                if failureMessages and args.ci:
+                    problems.ci_error('\n'.join(failureMessages),
+                                      filename=os.path.join(
+                                          p.path, 'tests',
+                                          testResult['filename']))
+
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
