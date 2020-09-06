@@ -65,9 +65,7 @@ if problem.disabled:
 
 problem.prepareZip(zipName)
 
-oUp = omegaUp(args.username, args.password)
-
-oUp.login()
+oUp = omegaup.api.API(args.username, args.password)
 
 if env.get('TRAVIS'):
     commit = env['TRAVIS_COMMIT']
@@ -79,7 +77,7 @@ else:
     commit = 'XXXXXX'
 
 message = 'Deployed automatically from commit ' + commit
-oUp.uploadProblem(problem, True, zipName, message)
+problems.upload(oUp, pConfig, True, zipName, message)
 
 os.remove(zipName)
 

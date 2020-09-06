@@ -6,15 +6,14 @@ import subprocess
 from zipfile import *
 from time import sleep
 
-from omegaUp import *
 import problems
+import omegaup.api
 
 env = os.environ
 
 logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
 
-oUp = omegaUp(env['OMEGAUPUSER'], env['OMEGAUPPASS'])
-oUp.login()
+oUp = omegaup.api.API(username=env['OMEGAUPUSER'], password=env['OMEGAUPPASS'])
 
 rootDirectory = problems.repositoryRoot()
 for p in problems.problems(allProblems='--all' in sys.argv):
@@ -85,7 +84,7 @@ for p in problems.problems(allProblems='--all' in sys.argv):
     canCreate = '--create' in sys.argv
 
     message = 'Deployed automatically from commit ' + commit
-    oUp.uploadProblem(pConfig, canCreate, zipPath, message)
+    problems.upload(oUp, pConfig, canCreate, zipPath, message)
 
     os.remove(zipPath)
 
