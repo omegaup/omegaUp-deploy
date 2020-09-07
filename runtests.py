@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import argparse
+import collections
 import json
 import logging
 import os
@@ -114,6 +115,10 @@ def _main() -> None:
             continue
 
         for testResult in report.get('tests', []):
+            testedFile = os.path.join(p.path,
+                                      'tests',
+                                      testResult['filename'])
+
             if testResult['type'] == 'solutions':
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
@@ -127,6 +132,7 @@ def _main() -> None:
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']),
                                              'validator')
+
             got = {
                 'verdict': testResult.get('result', {}).get('verdict'),
                 'score': testResult.get('result', {}).get('score'),
@@ -138,7 +144,7 @@ def _main() -> None:
                          f'expected={expected} got={got} | '
                          f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
 
-            failureMessages: List[str] = []
+            failureMessages: DefaultDict[str,List[str]] = collections.defaultdict(list)
 
             normalizedScore = Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
@@ -148,7 +154,7 @@ def _main() -> None:
 
                 failureMessage = f'Score isn\'t an integer!\n'
                 logging.error(failureMessage)
-                failureMessages.append(failureMessage)
+                failureMessages[testedFile].append(failureMessage)
 
             if testResult['state'] != 'passed':
                 failedCases = {
@@ -159,24 +165,31 @@ def _main() -> None:
 
                 if os.path.isdir(logsDirectory):
                     for stderrFilename in sorted(os.listdir(logsDirectory)):
+                        caseName = os.path.splitext(stderrFilename)[0]
+
                         if not stderrFilename.endswith('.err'):
                             continue
-                        if not os.path.splitext(stderrFilename)[0] in failedCases:
+                        if not caseName in failedCases:
                             continue
+
+                        if testResult['type'] == 'solutions':
+                            associatedFile = testedFile
+                        else:
+                            associatedFile = os.path.join(p.path,
+                                                          'cases',
+                                                          f'{caseName}.in')
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
                             failureMessage = f"{stderrFilename}:\n{textwrap.indent(out.read(), '    ')}"
                             logging.info(failureMessage)
-                            failureMessages.append(failureMessage)
+                            failureMessages[associatedFile].append(failureMessage)
                 else:
                     logging.warning('Logs directory %r not found.', logsDirectory)
 
-            if failureMessages and args.ci:
-                problems.ci_error('\n'.join(failureMessages),
-                                    filename=os.path.join(
-                                        p.path, 'tests',
-                                        testResult['filename']))
+            if args.ci:
+                for (path, messages) in failureMessages.iteritems():
+                    problems.ci_error('\n'.join(messages), filename=path)
 
 
         logging.info(f'Results for {p.title}: {report["state"]}')
