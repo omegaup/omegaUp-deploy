@@ -8,6 +8,7 @@ import subprocess
 import sys
 import textwrap
 
+from decimal import Decimal
 from typing import List
 
 import container
@@ -137,13 +138,24 @@ def _main() -> None:
                          f'expected={expected} got={got} | '
                          f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
 
+            failureMessages: List[str] = []
+
+            normalizedScore = Decimal(got.get('score', 0))
+            scaledScore = round(normalizedScore, 15) * 100
+
+            if scaledScore != int(scaledScore):
+                anyFailure = True
+
+                failureMessage = f'Score isn\'t an integer!\n'
+                logging.error(failureMessage)
+                failureMessages.append(failureMessage)
+
             if testResult['state'] != 'passed':
                 failedCases = {
                     c['name']
                     for g in testResult['result']['groups'] for c in g['cases']
                     if c['verdict'] != 'AC'
                 }
-                failureMessages: List[str] = []
 
                 if os.path.isdir(logsDirectory):
                     for stderrFilename in sorted(os.listdir(logsDirectory)):
@@ -160,11 +172,11 @@ def _main() -> None:
                 else:
                     logging.warning('Logs directory %r not found.', logsDirectory)
 
-                if failureMessages and args.ci:
-                    problems.ci_error('\n'.join(failureMessages),
-                                      filename=os.path.join(
-                                          p.path, 'tests',
-                                          testResult['filename']))
+            if failureMessages and args.ci:
+                problems.ci_error('\n'.join(failureMessages),
+                                    filename=os.path.join(
+                                        p.path, 'tests',
+                                        testResult['filename']))
 
 
         logging.info(f'Results for {p.title}: {report["state"]}')
