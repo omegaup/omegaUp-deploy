@@ -47,7 +47,8 @@ def ci_error(message: str,
         location.append(f'col={col}')
     print(
         f'::error {",".join(location)}::' +
-        message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+        message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'),
+        flush=True)
 
 
 def error(message: str,
