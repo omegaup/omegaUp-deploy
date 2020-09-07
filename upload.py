@@ -257,13 +257,22 @@ def _main() -> None:
         commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                          universal_newlines=True).strip()
 
-    problemList = args.problem_paths
-    if not problemList:
+    if args.problem_paths:
+        # Generate the Problem objects from just the path. The title is ignored
+        # anyways, since it's read from the configuration file in the problem
+        # directory.
+        problemList = [
+            problems.Problem(path=problemPath,
+                             title=os.path.basename(problemPath),
+                             disabled=False)
+            for problemPath in args.problem_paths
+        ]
+    else:
         problemList = problems.problems(allProblems=args.all)
 
-    for problemPath in problemList:
+    for problem in problemList:
         uploadProblem(api,
-                      problemPath,
+                      problem.path,
                       commit=commit,
                       canCreate=args.can_create)
 
