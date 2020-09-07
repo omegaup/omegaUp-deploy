@@ -75,7 +75,8 @@ class Compile:
             '--entrypoint',
             '/usr/bin/sleep',
             '--volume',
-            f'{os.path.abspath(self.sourcePath)}:/src/{self.containerSourceFilename}',
+            (f'{os.path.abspath(self.sourcePath)}:'
+             f'/src/{self.containerSourceFilename}'),
             getImageName(self.ci),
             'infinity',
         ],
@@ -96,7 +97,7 @@ class Compile:
                 '--compile-target',
                 'Main',
             ])
-        except:
+        except:  # noqa: bare-except: The exception is re-thrown later.
             # If the container errored out before returning, __exit__() won't
             # be called, and the container will leak. Explicitly clean up
             # before re-raising the exception to avoid that.

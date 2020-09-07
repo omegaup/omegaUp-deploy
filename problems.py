@@ -6,6 +6,7 @@ import json
 
 from typing import List, NamedTuple, NoReturn, Optional
 
+
 class Problem(NamedTuple):
     """Represents a single problem."""
     path: str

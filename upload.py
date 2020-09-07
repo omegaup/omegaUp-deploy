@@ -240,11 +240,10 @@ def _main() -> None:
                         type=str,
                         default=env.get('OMEGAUPPASS'),
                         required='OMEGAUPPASS' not in env)
-    parser.add_argument(
-        '--can-create',
-        action='store_true',
-        help=
-        "Whether it's allowable to create the problem if it does not exist.")
+    parser.add_argument('--can-create',
+                        action='store_true',
+                        help=("Whether it's allowable to create the "
+                              "problem if it does not exist."))
     parser.add_argument('problem_paths',
                         metavar='PROBLEM',
                         type=str,

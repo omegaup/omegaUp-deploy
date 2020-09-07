@@ -116,7 +116,7 @@ def _main() -> None:
 
                 for inFilename in inFilenames:
                     logging.debug('Generating .pngs for %s', inFilename)
-                    dimMatch = re.search('\.(\d*)x(\d*)\.in', inFilename)
+                    dimMatch = re.search(r'\.(\d*)x(\d*)\.in', inFilename)
                     if dimMatch:
                         dimOpts = [
                             '--height',

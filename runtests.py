@@ -33,9 +33,10 @@ def _main() -> None:
     parser.add_argument('--results-directory',
                         default=os.path.join(rootDirectory, 'results'),
                         help='Directory to store the results of the runs')
-    parser.add_argument('--only-pull-image',
-                        action='store_true',
-                        help='Don\'t run tests: only download the Docker container')
+    parser.add_argument(
+        '--only-pull-image',
+        action='store_true',
+        help='Don\'t run tests: only download the Docker container')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s: %(message)s',
@@ -115,15 +116,14 @@ def _main() -> None:
             continue
 
         for testResult in report.get('tests', []):
-            testedFile = os.path.join(p.path,
-                                      'tests',
-                                      testResult['filename'])
+            testedFile = os.path.join(p.path, 'tests', testResult['filename'])
 
             if testResult['type'] == 'solutions':
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
                 if not expected:
-                    # If there are no constraints, by default expect the run to be accepted.
+                    # If there are no constraints, by default expect the run to
+                    # be accepted.
                     expected['verdict'] = 'AC'
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']))
@@ -138,13 +138,15 @@ def _main() -> None:
                 'score': testResult.get('result', {}).get('score'),
             }
 
-            logging.info(f'    {testResult["type"]:10} | '
-                         f'{testResult["filename"][:40]:40} | '
-                         f'{testResult["state"]:8} | '
-                         f'expected={expected} got={got} | '
-                         f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
+            logging.info(
+                f'    {testResult["type"]:10} | '
+                f'{testResult["filename"][:40]:40} | '
+                f'{testResult["state"]:8} | '
+                f'expected={expected} got={got} | '
+                f'logs at {os.path.relpath(logsDirectory, rootDirectory)}')
 
-            failureMessages: DefaultDict[str,List[str]] = collections.defaultdict(list)
+            failureMessages: DefaultDict[
+                str, List[str]] = collections.defaultdict(list)
 
             normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
@@ -152,7 +154,8 @@ def _main() -> None:
             if scaledScore != int(scaledScore):
                 anyFailure = True
 
-                failureMessage = f'Score isn\'t an integer! Got: {scaledScore}\n'
+                failureMessage = (f'Score isn\'t an integer! '
+                                  f'Got: {scaledScore}\n')
                 logging.error(failureMessage)
                 failureMessages[testedFile].append(failureMessage)
 
@@ -169,28 +172,30 @@ def _main() -> None:
 
                         if not stderrFilename.endswith('.err'):
                             continue
-                        if not caseName in failedCases:
+                        if caseName not in failedCases:
                             continue
 
                         if testResult['type'] == 'solutions':
                             associatedFile = testedFile
                         else:
-                            associatedFile = os.path.join(p.path,
-                                                          'cases',
-                                                          f'{caseName}.in')
+                            associatedFile = os.path.join(
+                                p.path, 'cases', f'{caseName}.in')
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
-                            failureMessage = f"{stderrFilename}:\n{textwrap.indent(out.read(), '    ')}"
+                            failureMessage = (
+                                f"{stderrFilename}:"
+                                f"\n{textwrap.indent(out.read(), '    ')}")
                             logging.info(failureMessage)
-                            failureMessages[associatedFile].append(failureMessage)
+                            failureMessages[associatedFile].append(
+                                failureMessage)
                 else:
-                    logging.warning('Logs directory %r not found.', logsDirectory)
+                    logging.warning('Logs directory %r not found.',
+                                    logsDirectory)
 
             if args.ci:
                 for (path, messages) in failureMessages.items():
                     problems.ci_error('\n'.join(messages), filename=path)
-
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
