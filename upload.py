@@ -57,7 +57,8 @@ def createProblemZip(problemConfig: Mapping[str, Any], problemPath: str,
             _recursiveAdd(directory)
 
 
-def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
+def uploadProblemZip(client: omegaup.api.Client, problemConfig: Mapping[str,
+                                                                        Any],
                      canCreate: bool, zipPath: str, message: str) -> None:
     """Uploads a problem with the given .zip and configuration."""
     misc = problemConfig['misc']
@@ -83,7 +84,8 @@ def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
         'email_clarifications': misc['email_clarifications'],
     }
 
-    exists = api.problem.exists(alias)
+    exists = client.problem.details(problem_alias=alias,
+                                    check_=False)['status'] == 'ok'
 
     if not exists:
         if not canCreate:
@@ -119,13 +121,13 @@ def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
 
     files = {'problem_contents': open(zipPath, 'rb')}
 
-    api.query(endpoint, payload, files)
+    client.query(endpoint, payload, files)
 
     targetAdmins = misc.get('admins', [])
     targetAdminGroups = misc.get('admin-groups', [])
 
     if targetAdmins or targetAdminGroups:
-        allAdmins = api.problem.admins(alias)
+        allAdmins = client.problem.admins(problem_alias=alias)
 
     if targetAdmins is not None:
         admins = {
@@ -135,16 +137,17 @@ def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
 
         desiredAdmins = {admin.lower() for admin in targetAdmins}
 
-        adminsToRemove = admins - desiredAdmins - {api.username.lower()}
-        adminsToAdd = desiredAdmins - admins - {api.username.lower()}
+        adminsToRemove = admins - desiredAdmins - {client.username.lower()}
+        adminsToAdd = desiredAdmins - admins - {client.username.lower()}
 
         for admin in adminsToAdd:
             logging.info('Adding problem admin: %s', admin)
-            api.problem.addAdmin(alias, admin)
+            client.problem.addAdmin(problem_alias=alias, usernameOrEmail=admin)
 
         for admin in adminsToRemove:
             logging.info('Removing problem admin: %s', admin)
-            api.problem.removeAdmin(alias, admin)
+            client.problem.removeAdmin(problem_alias=alias,
+                                       usernameOrEmail=admin)
 
     if targetAdminGroups is not None:
         adminGroups = {
@@ -159,14 +162,17 @@ def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
 
         for group in groupsToAdd:
             logging.info('Adding problem admin group: %s', group)
-            api.problem.addGroupAdmin(alias, group)
+            client.problem.addGroupAdmin(problem_alias=alias, group=group)
 
         for group in groupsToRemove:
             logging.info('Removing problem admin group: %s', group)
-            api.problem.removeGroupAdmin(alias, group)
+            client.problem.removeGroupAdmin(problem_alias=alias, group=group)
 
     if 'tags' in misc:
-        tags = {t['name'].lower() for t in api.problem.tags(alias)['tags']}
+        tags = {
+            t['name'].lower()
+            for t in client.problem.tags(problem_alias=alias)['tags']
+        }
 
         desiredTags = {t.lower() for t in misc['tags']}
 
@@ -177,14 +183,16 @@ def uploadProblemZip(api: omegaup.api.API, problemConfig: Mapping[str, Any],
             if tag.startsWith('problemRestrictedTag'):
                 logging.info('Skipping restricted tag: %s', tag)
                 continue
-            api.problem.removeTag(alias, tag)
+            client.problem.removeTag(problem_alias=alias, name=tag)
 
         for tag in tagsToAdd:
             logging.info('Adding problem tag: %s', tag)
-            api.problem.addTag(alias, tag, public=payload.get('public', False))
+            client.problem.addTag(problem_alias=alias,
+                                  name=tag,
+                                  public=payload.get('public', False))
 
 
-def uploadProblem(api: omegaup.api.API, problemPath: str, commit: str,
+def uploadProblem(client: omegaup.api.Client, problemPath: str, commit: str,
                   canCreate: bool) -> None:
     with open(os.path.join(problemPath, 'settings.json'), 'r') as f:
         problemConfig = json.load(f)
@@ -195,7 +203,7 @@ def uploadProblem(api: omegaup.api.API, problemPath: str, commit: str,
         createProblemZip(problemConfig, problemPath, tempFile.name)
 
         uploadProblemZip(
-            api,
+            client,
             problemConfig,
             canCreate,
             tempFile.name,
@@ -247,9 +255,9 @@ def _main() -> None:
                         level=logging.DEBUG if args.verbose else logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
-    api = omegaup.api.API(username=args.username,
-                          password=args.password,
-                          url=args.url)
+    client = omegaup.api.Client(username=args.username,
+                                password=args.password,
+                                url=args.url)
 
     if env.get('GITHUB_ACTIONS'):
         commit = env['GITHUB_SHA']
@@ -271,7 +279,7 @@ def _main() -> None:
         problemList = problems.problems(allProblems=args.all)
 
     for problem in problemList:
-        uploadProblem(api,
+        uploadProblem(client,
                       problem.path,
                       commit=commit,
                       canCreate=args.can_create)
@@ -279,4 +287,3 @@ def _main() -> None:
 
 if __name__ == '__main__':
     _main()
-

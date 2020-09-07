@@ -11,10 +11,8 @@ name = "pypi"
 
 [packages]
 
-requests = ">=2.20.0"
-requests-toolbelt = "*"
-libkarel = "*"
-omegaup = "*"
+libkarel = ">=1.0.2"
+omegaup = ">=1.1.1"
 
 
 [requires]
