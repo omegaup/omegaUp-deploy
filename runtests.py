@@ -188,7 +188,7 @@ def _main() -> None:
                     logging.warning('Logs directory %r not found.', logsDirectory)
 
             if args.ci:
-                for (path, messages) in failureMessages.iteritems():
+                for (path, messages) in failureMessages.items():
                     problems.ci_error('\n'.join(messages), filename=path)
 
 
