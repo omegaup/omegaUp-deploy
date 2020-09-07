@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import collections
+import decimal
 import json
 import logging
 import os
@@ -9,8 +10,7 @@ import subprocess
 import sys
 import textwrap
 
-from decimal import Decimal
-from typing import List
+from typing import DefaultDict, List
 
 import container
 import problems
@@ -146,13 +146,13 @@ def _main() -> None:
 
             failureMessages: DefaultDict[str,List[str]] = collections.defaultdict(list)
 
-            normalizedScore = Decimal(got.get('score', 0))
+            normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
 
             if scaledScore != int(scaledScore):
                 anyFailure = True
 
-                failureMessage = f'Score isn\'t an integer!\n'
+                failureMessage = f'Score isn\'t an integer! Got: {scaledScore}\n'
                 logging.error(failureMessage)
                 failureMessages[testedFile].append(failureMessage)
 
