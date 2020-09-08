@@ -4,14 +4,13 @@ import sys
 import subprocess
 import json
 
-from typing import List, NamedTuple, NoReturn, Optional
+from typing import List, NamedTuple, NoReturn, Optional, Sequence
 
 
 class Problem(NamedTuple):
     """Represents a single problem."""
     path: str
     title: str
-    disabled: bool
 
 
 def repositoryRoot() -> str:
@@ -76,6 +75,7 @@ def fatal(message: str,
 
 
 def problems(allProblems: bool = False,
+             problemPaths: Sequence[str] = (),
              rootDirectory: Optional[str] = None) -> List[Problem]:
     """Gets the list of problems that will be considered.
 
@@ -94,10 +94,20 @@ def problems(allProblems: bool = False,
 
     configProblems: List[Problem] = []
     for problem in config['problems']:
+        if problem.get('disabled', False):
+            logging.warning('Problem %s disabled. Skipping.', problem['title'])
+            continue
         configProblems.append(
-            Problem(path=problem['path'],
-                    title=problem['title'],
-                    disabled=problem.get('disabled', False)))
+            Problem(path=problem['path'], title=problem['title']))
+
+    if problemPaths:
+        # Generate the Problem objects from just the path. The title is ignored
+        # anyways, since it's read from the configuration file in the problem
+        # directory for anything important.
+        return [
+            Problem(path=problemPath, title=os.path.basename(problemPath))
+            for problemPath in problemPaths
+        ]
 
     if allProblems:
         logging.info('Loading everything as requested.')

@@ -37,6 +37,10 @@ def _main() -> None:
         '--only-pull-image',
         action='store_true',
         help='Don\'t run tests: only download the Docker container')
+    parser.add_argument('problem_paths',
+                        metavar='PROBLEM',
+                        type=str,
+                        nargs='*')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s: %(message)s',
@@ -54,11 +58,8 @@ def _main() -> None:
     os.makedirs(args.results_directory)
 
     for p in problems.problems(allProblems=args.all,
-                               rootDirectory=rootDirectory):
-        if p.disabled:
-            logging.warn('Problem %s disabled. Skipping.', p.title)
-            continue
-
+                               rootDirectory=rootDirectory,
+                               problemPaths=args.problem_paths):
         logging.info('Testing problem: %s...', p.title)
 
         problemResultsDirectory = os.path.join(args.results_directory, p.path)

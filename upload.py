@@ -57,9 +57,9 @@ def createProblemZip(problemConfig: Mapping[str, Any], problemPath: str,
             _recursiveAdd(directory)
 
 
-def uploadProblemZip(client: omegaup.api.Client, problemConfig: Mapping[str,
-                                                                        Any],
-                     canCreate: bool, zipPath: str, message: str) -> None:
+def uploadProblemZip(client: omegaup.api.Client,
+                     problemConfig: Mapping[str, Any], canCreate: bool,
+                     zipPath: str, commitMessage: str) -> None:
     """Uploads a problem with the given .zip and configuration."""
     misc = problemConfig['misc']
     alias = misc['alias']
@@ -67,7 +67,7 @@ def uploadProblemZip(client: omegaup.api.Client, problemConfig: Mapping[str,
     validator = problemConfig['validator']
 
     payload = {
-        'message': message,
+        'message': commitMessage,
         'problem_alias': alias,
         'title': problemConfig['title'],
         'source': problemConfig['source'],
@@ -192,8 +192,8 @@ def uploadProblemZip(client: omegaup.api.Client, problemConfig: Mapping[str,
                                   public=payload.get('public', False))
 
 
-def uploadProblem(client: omegaup.api.Client, problemPath: str, commit: str,
-                  canCreate: bool) -> None:
+def uploadProblem(client: omegaup.api.Client, problemPath: str,
+                  commitMessage: str, canCreate: bool) -> None:
     with open(os.path.join(problemPath, 'settings.json'), 'r') as f:
         problemConfig = json.load(f)
 
@@ -202,12 +202,11 @@ def uploadProblem(client: omegaup.api.Client, problemPath: str, commit: str,
     with tempfile.NamedTemporaryFile() as tempFile:
         createProblemZip(problemConfig, problemPath, tempFile.name)
 
-        uploadProblemZip(
-            client,
-            problemConfig,
-            canCreate,
-            tempFile.name,
-            message=f'Deployed automatically from commit {commit}')
+        uploadProblemZip(client,
+                         problemConfig,
+                         canCreate,
+                         tempFile.name,
+                         commitMessage=commitMessage)
 
         logging.info('Success uploading %s', problemConfig['title'])
 
@@ -264,24 +263,16 @@ def _main() -> None:
         commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                          universal_newlines=True).strip()
 
-    if args.problem_paths:
-        # Generate the Problem objects from just the path. The title is ignored
-        # anyways, since it's read from the configuration file in the problem
-        # directory.
-        problemList = [
-            problems.Problem(path=problemPath,
-                             title=os.path.basename(problemPath),
-                             disabled=False)
-            for problemPath in args.problem_paths
-        ]
-    else:
-        problemList = problems.problems(allProblems=args.all)
+    rootDirectory = problems.repositoryRoot()
 
-    for problem in problemList:
-        uploadProblem(client,
-                      problem.path,
-                      commit=commit,
-                      canCreate=args.can_create)
+    for problem in problems.problems(allProblems=args.all,
+                                     rootDirectory=rootDirectory,
+                                     problemPaths=args.problem_paths):
+        uploadProblem(
+            client,
+            os.path.join(rootDirectory, problem.path),
+            commitMessage=f'Deployed automatically from commit {commit}',
+            canCreate=args.can_create)
 
 
 if __name__ == '__main__':

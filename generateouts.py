@@ -25,6 +25,10 @@ def _main() -> None:
     parser.add_argument('--verbose',
                         action='store_true',
                         help='Verbose logging')
+    parser.add_argument('problem_paths',
+                        metavar='PROBLEM',
+                        type=str,
+                        nargs='*')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s: %(message)s',
@@ -34,12 +38,9 @@ def _main() -> None:
     rootDirectory = problems.repositoryRoot()
 
     for p in problems.problems(allProblems=args.all,
-                               rootDirectory=rootDirectory):
+                               rootDirectory=rootDirectory,
+                               problemPaths=args.problem_paths):
         logging.info('Generating outputs for problem: %s', p.title)
-
-        if p.disabled:
-            logging.warning('Problem disabled.')
-            continue
 
         pPath = os.path.join(rootDirectory, p.path)
         pConfigPath = os.path.join(pPath, 'settings.json')
