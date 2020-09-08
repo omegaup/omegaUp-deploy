@@ -110,7 +110,7 @@ def _main() -> None:
         if report['state'] == 'skipped':
             problems.error(
                 f'Skipped {p.title}:\n'
-                'tests/tests.json, settings.json, or testplan are '
+                'tests/tests.json, settings.json, outs, or testplan are '
                 'probably missing or invalid.',
                 filename=os.path.join(p.path, 'settings.json'))
             continue
