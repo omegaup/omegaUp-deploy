@@ -110,7 +110,7 @@ def _main() -> None:
 
         if report['state'] == 'skipped':
             problems.error(
-                f'Skipped {p.title}:\n'
+                f'Skipped {p.title}: '
                 'tests/tests.json, settings.json, outs, or testplan are '
                 'probably missing or invalid.',
                 filename=os.path.join(p.path, 'settings.json'))
@@ -161,6 +161,26 @@ def _main() -> None:
                 failureMessages[testedFile].append(failureMessage)
 
             if testResult['state'] != 'passed':
+                # Build a table that reports groups and case verdicts.
+                groupReportTable = [
+                    f'{"group":20} | {"case":20} | {"score":7} | {"verdict"}',
+                    f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}',
+                ]
+                for group in testResult['result']['groups']:
+                    groupReportTable.append(
+                        f'{group["group"][:20]:20} | {"":20} | '
+                        f'{group["score"]*100:6.2f}% |')
+                    for c in group['cases']:
+                        groupReportTable.append(
+                            f'{"":20} | {c["name"][:20]:20} | '
+                            f'{c["score"]*100:6.2f}% | {c["verdict"]:3}')
+                    groupReportTable.append(
+                        f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
+                for line in groupReportTable:
+                    logging.info('%71s%s', '', line)
+                failureMessages[testResult['filename']].append(
+                    '\n'.join(groupReportTable))
+
                 failedCases = {
                     c['name']
                     for g in testResult['result']['groups'] for c in g['cases']
