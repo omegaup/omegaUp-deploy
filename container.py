@@ -7,6 +7,8 @@ import os.path
 from types import TracebackType
 from typing import AnyStr, Iterator, IO, Optional, Type, Sequence
 
+import problems
+
 _LANGUAGE_MAPPING = {
     'cpp': 'cpp17-gcc',
 }
@@ -97,7 +99,11 @@ class Compile:
                 '--compile-target',
                 'Main',
             ])
-        except:  # noqa: bare-except: The exception is re-thrown later.
+        except subprocess.CalledProcessError as cpe:
+            problems.error((f'Failed to compile {self.sourcePath}:\n' +
+                            cpe.stderr.decode("utf-8")),
+                           filename=self.sourcePath,
+                           ci=self.ci)
             # If the container errored out before returning, __exit__() won't
             # be called, and the container will leak. Explicitly clean up
             # before re-raising the exception to avoid that.
@@ -151,6 +157,7 @@ class Compile:
                 list(args),
                 stdin=stdin,
                 stdout=stdout,
+                stderr=subprocess.PIPE,
                 timeout=timeout.total_seconds(),
                 check=True)
 
