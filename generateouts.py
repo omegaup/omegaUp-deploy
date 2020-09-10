@@ -210,7 +210,7 @@ def _main() -> None:
                                 p,
                                 rootDirectory=rootDirectory,
                                 force=args.force,
-                                ci=args.force))
+                                ci=args.ci))
 
         if not all(future.result()
                    for future in concurrent.futures.as_completed(futures)):
