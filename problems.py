@@ -4,13 +4,25 @@ import sys
 import subprocess
 import json
 
-from typing import List, NamedTuple, NoReturn, Optional, Sequence
+from typing import Any, List, Mapping, NamedTuple, NoReturn, Optional, Sequence
 
 
 class Problem(NamedTuple):
     """Represents a single problem."""
     path: str
     title: str
+    config: Mapping[str, Any]
+
+    @staticmethod
+    def load(problemPath: str, rootDirectory: str) -> 'Problem':
+        """Load a single proble from the path."""
+        with open(os.path.join(rootDirectory, problemPath,
+                               'settings.json')) as f:
+            problemConfig = json.load(f)
+
+        return Problem(path=problemPath,
+                       title=problemConfig['title'],
+                       config=problemConfig)
 
 
 def repositoryRoot() -> str:
@@ -89,6 +101,15 @@ def problems(allProblems: bool = False,
 
     logging.info('Loading problems...')
 
+    if problemPaths:
+        # Generate the Problem objects from just the path. The title is ignored
+        # anyways, since it's read from the configuration file in the problem
+        # directory for anything important.
+        return [
+            Problem.load(problemPath=problemPath, rootDirectory=rootDirectory)
+            for problemPath in problemPaths
+        ]
+
     with open(os.path.join(rootDirectory, 'problems.json'), 'r') as p:
         config = json.load(p)
 
@@ -98,16 +119,8 @@ def problems(allProblems: bool = False,
             logging.warning('Problem %s disabled. Skipping.', problem['title'])
             continue
         configProblems.append(
-            Problem(path=problem['path'], title=problem['title']))
-
-    if problemPaths:
-        # Generate the Problem objects from just the path. The title is ignored
-        # anyways, since it's read from the configuration file in the problem
-        # directory for anything important.
-        return [
-            Problem(path=problemPath, title=os.path.basename(problemPath))
-            for problemPath in problemPaths
-        ]
+            Problem.load(problemPath=problem['path'],
+                         rootDirectory=rootDirectory))
 
     if allProblems:
         logging.info('Loading everything as requested.')

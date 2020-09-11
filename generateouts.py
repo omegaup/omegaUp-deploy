@@ -21,12 +21,8 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
     logging.info('%-30s: Generating outputs for problem', p.title)
 
     pPath = os.path.join(rootDirectory, p.path)
-    pConfigPath = os.path.join(pPath, 'settings.json')
 
-    with open(pConfigPath, 'r') as pc:
-        pConfig = json.load(pc)
-
-    if 'cases' in pConfig:
+    if 'cases' in p.config:
         testplan = os.path.join(pPath, 'testplan')
 
         logging.info('%-30s: Generating testplan from settings.json.', p.title)
@@ -38,11 +34,11 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
                 ci=ci)
 
         with open(testplan, 'w') as tp:
-            for group in pConfig['cases']:
+            for group in p.config['cases']:
                 for case in group['cases']:
                     tp.write("{} {}\n".format(case['name'], case['weight']))
 
-    languages = pConfig['misc']['languages']
+    languages = p.config['misc']['languages']
     if languages == 'none':
         return True
 
@@ -54,7 +50,7 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
         return True
     if len(generators) != 1:
         problems.fatal(f'Found more than one generator! {generators}',
-                       filename=os.path.relpath(pConfigPath, rootDirectory),
+                       filename=os.path.join(p.path, 'settings.json'),
                        ci=ci)
 
     genPath = os.path.join(pPath, generators[0])
@@ -72,8 +68,7 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
 
         if not inFilenames:
             problems.fatal(f'No test cases found for {p.title}!',
-                           filename=os.path.relpath(pConfigPath,
-                                                    rootDirectory),
+                           filename=os.path.join(p.path, 'settings.json'),
                            ci=ci)
 
         for inFilename in inFilenames:
