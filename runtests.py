@@ -109,11 +109,11 @@ def _main() -> None:
             anyFailure = True
 
         if report['state'] == 'skipped':
-            problems.error(
-                f'Skipped {p.title}: '
+            errorString = report['error'] or (
                 'tests/tests.json, settings.json, outs, or testplan are '
-                'probably missing or invalid.',
-                filename=os.path.join(p.path, 'settings.json'))
+                'probably missing or invalid.')
+            problems.error(f'Skipped {p.title}: {errorString}',
+                           filename=os.path.join(p.path, 'settings.json'))
             continue
 
         for testResult in report.get('tests', []):
