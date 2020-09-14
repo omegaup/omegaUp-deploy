@@ -7,6 +7,8 @@ name = "pypi"
 
 [dev-packages]
 
+mypy = ">=0.782"
+pycodestyle = ">=2.6.0"
 
 
 [packages]
