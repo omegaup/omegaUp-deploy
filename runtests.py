@@ -239,16 +239,6 @@ def _main() -> None:
             normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
 
-            if p.config.get(
-                    'allowDecimal',
-                    False) == False and scaledScore != int(scaledScore):
-                anyFailure = True
-
-                failureMessage = (f'Score isn\'t an integer! '
-                                  f'Got: {scaledScore}\n')
-                logging.error(failureMessage)
-                failureMessages[testedFile].append(failureMessage)
-
             if testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
                 groupReportTable = [
