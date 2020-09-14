@@ -239,7 +239,8 @@ def _main() -> None:
             normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
 
-            if scaledScore != int(scaledScore):
+            if p.get('allowDecimal',
+                     False) and scaledScore != int(scaledScore):
                 anyFailure = True
 
                 failureMessage = (f'Score isn\'t an integer! '
