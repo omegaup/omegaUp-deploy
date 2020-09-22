@@ -24,6 +24,21 @@ class Problem(NamedTuple):
                        title=problemConfig['title'],
                        config=problemConfig)
 
+    def shouldGenerateOutputs(self, *, rootDirectory: str) -> bool:
+        """Returns whether the .out files should be generated for this problem.
+
+        .out files are only generated if there is a .gitignore file that
+        contains the line `**/*.out` in the problem directory.
+        """
+        gitignorePath = os.path.join(rootDirectory, self.path, '.gitignore')
+        if not os.path.isfile(gitignorePath):
+            return False
+        with open(gitignorePath, 'r') as f:
+            for line in f:
+                if line.strip() == '**/*.out':
+                    return True
+        return False
+
 
 def repositoryRoot() -> str:
     """Returns the root directory of the project.

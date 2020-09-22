@@ -20,22 +20,6 @@ import problems
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
 
-def _shouldGenerateOutputs(p: problems.Problem, *, rootDirectory: str) -> bool:
-    """Returns whether the .out files should be generated for this problem.
-
-    .out files are only generated if there is a .gitignore file that contains
-    the line `**/*.out` in the problem directory.
-    """
-    gitignorePath = os.path.join(rootDirectory, p.path, '.gitignore')
-    if not os.path.isfile(gitignorePath):
-        return False
-    with open(gitignorePath, 'r') as f:
-        for line in f:
-            if line.strip() == '**/*.out':
-                return True
-    return False
-
-
 def _threadInitializer(threadAffinityMapping: Dict[int, int],
                        lock: threading.Lock) -> None:
     """Set the thread affinity mapping for the current thread."""
@@ -65,7 +49,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     # Also make the ci log's permissions very lax.
     os.chmod(os.path.join(problemResultsDirectory, 'ci.log'), 0o666)
 
-    if _shouldGenerateOutputs(p, rootDirectory=rootDirectory):
+    if p.shouldGenerateOutputs(rootDirectory=rootDirectory):
         outputsArgs = [
             '-outputs',
             os.path.relpath(problemOutputsDirectory, rootDirectory),

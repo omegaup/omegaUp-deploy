@@ -81,10 +81,13 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
     """Generate .out files for the provided problem."""
     logging.info('%-30s: Generating outputs for problem', p.title)
 
+    if not p.shouldGenerateOutputs(rootDirectory=rootDirectory):
+        logging.warning('%-30s: .gitignore with `**/*.out` found! Skipping.', p.title)
+        return True
     solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
     if solutionPath is None:
-        logging.warning('%-30s: No solution found! Skipping.', p.title)
-        return True
+        logging.warning('%-30s: Failed to find a solution file.', p.title)
+        return False
     relativeSolutionPath = os.path.relpath(solutionPath, rootDirectory)
 
     inFilenames = _getInputs(p, rootDirectory=rootDirectory, ci=ci)
