@@ -82,7 +82,8 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
     logging.info('%-30s: Generating outputs for problem', p.title)
 
     if not p.shouldGenerateOutputs(rootDirectory=rootDirectory):
-        logging.warning('%-30s: .gitignore with `**/*.out` found! Skipping.', p.title)
+        logging.warning('%-30s: .gitignore with `**/*.out` found! Skipping.',
+                        p.title)
         return True
     solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
     if solutionPath is None:
