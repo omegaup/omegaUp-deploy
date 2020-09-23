@@ -138,7 +138,9 @@ def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
     """Generate .png files for the provided problem."""
     logging.info('%-30s: Generating outputs for problem', p.title)
 
-    pPath = os.path.join(rootDirectory, p.path)
+    if p.config.get('misc', {}).get('languages') != 'karel':
+        logging.warning('%-30s: Not a karel problem! Skipping.', p.title)
+        return True
 
     solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
     if solutionPath is None:
@@ -155,7 +157,6 @@ def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
         for inFilename in inFilenames:
             relativeInFilename = os.path.relpath(inFilename, rootDirectory)
             outFilename = f'{os.path.splitext(inFilename)[0]}.out'
-            relativeOutFilename = os.path.relpath(outFilename, rootDirectory)
 
             logging.debug('%-30s: Generating .pngs for %s', p.title,
                           inFilename)
