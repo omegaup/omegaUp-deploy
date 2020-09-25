@@ -262,7 +262,7 @@ def _main() -> None:
                                 f'{c["score"]*100:6.2f}% | {c["verdict"]:3}')
                         groupReportTable.append(
                             f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
-                    for line in groupReportTable:
+
                     failureMessages[testResult['filename']].append(
                         '\n'.join(groupReportTable))
 
