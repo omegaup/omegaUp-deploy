@@ -114,7 +114,7 @@ def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
             try:
                 c.run(inFilename,
                       outFilename,
-                      timeout=datetime.timedelta(seconds=5))
+                      timeout=datetime.timedelta(seconds=10))
             except subprocess.CalledProcessError as cpe:
                 anyProblemFailure = True
                 with open(outFilename, 'r') as f:
