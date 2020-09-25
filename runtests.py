@@ -250,7 +250,6 @@ def _main() -> None:
                 if 'compile_error' in testResult['result']:
                     failureMessage = f"{testedFile}:\n" + textwrap.indent(
                         testResult['result']['compile_error'], '    ')
-                    logging.info(failureMessage)
                     failureMessages[testedFile].append(failureMessage)
                 if testResult['result']['groups'] is not None:
                     for group in testResult['result']['groups']:
@@ -264,7 +263,6 @@ def _main() -> None:
                         groupReportTable.append(
                             f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
                     for line in groupReportTable:
-                        logging.info('%71s%s', '', line)
                     failureMessages[testResult['filename']].append(
                         '\n'.join(groupReportTable))
 
@@ -296,16 +294,17 @@ def _main() -> None:
                             failureMessage = (
                                 f"{stderrFilename}:"
                                 f"\n{textwrap.indent(out.read(), '    ')}")
-                            logging.info(failureMessage)
                             failureMessages[associatedFile].append(
                                 failureMessage)
                 else:
                     logging.warning('Logs directory %r not found.',
                                     logsDirectory)
 
-            if args.ci:
-                for (path, messages) in failureMessages.items():
+            for (path, messages) in failureMessages.items():
+                if args.ci:
                     problems.ci_error('\n'.join(messages), filename=path)
+                else:
+                    logging.info('\n'.join(messages))
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
