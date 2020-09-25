@@ -205,7 +205,8 @@ def _main() -> None:
             continue
 
         for testResult in report.get('tests', []):
-            testedFile = os.path.join(p.path, 'tests', testResult['filename'])
+            testedFile = os.path.normpath(
+                os.path.join(p.path, 'tests', testResult['filename']))
 
             if testResult['type'] == 'solutions':
                 expected = dict(testResult['solution'])
@@ -246,26 +247,34 @@ def _main() -> None:
                     f'{"group":20} | {"case":20} | {"score":7} | {"verdict"}',
                     f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}',
                 ]
-                for group in testResult['result']['groups']:
-                    groupReportTable.append(
-                        f'{group["group"][:20]:20} | {"":20} | '
-                        f'{group["score"]*100:6.2f}% |')
-                    for c in group['cases']:
+                if 'compile_error' in testResult['result']:
+                    failureMessage = f"{testedFile}:\n" + textwrap.indent(
+                        testResult['result']['compile_error'], '    ')
+                    logging.info(failureMessage)
+                    failureMessages[testedFile].append(failureMessage)
+                if testResult['result']['groups'] is not None:
+                    for group in testResult['result']['groups']:
                         groupReportTable.append(
-                            f'{"":20} | {c["name"][:20]:20} | '
-                            f'{c["score"]*100:6.2f}% | {c["verdict"]:3}')
-                    groupReportTable.append(
-                        f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
-                for line in groupReportTable:
-                    logging.info('%71s%s', '', line)
-                failureMessages[testResult['filename']].append(
-                    '\n'.join(groupReportTable))
+                            f'{group["group"][:20]:20} | {"":20} | '
+                            f'{group["score"]*100:6.2f}% |')
+                        for c in group['cases']:
+                            groupReportTable.append(
+                                f'{"":20} | {c["name"][:20]:20} | '
+                                f'{c["score"]*100:6.2f}% | {c["verdict"]:3}')
+                        groupReportTable.append(
+                            f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
+                    for line in groupReportTable:
+                        logging.info('%71s%s', '', line)
+                    failureMessages[testResult['filename']].append(
+                        '\n'.join(groupReportTable))
 
-                failedCases = {
-                    c['name']
-                    for g in testResult['result']['groups'] for c in g['cases']
-                    if c['verdict'] != 'AC'
-                }
+                    failedCases = {
+                        c['name']
+                        for g in testResult['result']['groups']
+                        for c in g['cases'] if c['verdict'] != 'AC'
+                    }
+                else:
+                    failedCases = set()
 
                 if os.path.isdir(logsDirectory):
                     for stderrFilename in sorted(os.listdir(logsDirectory)):
