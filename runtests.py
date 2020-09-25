@@ -301,10 +301,7 @@ def _main() -> None:
                                     logsDirectory)
 
             for (path, messages) in failureMessages.items():
-                if args.ci:
-                    problems.ci_error('\n'.join(messages), filename=path)
-                else:
-                    logging.info('\n'.join(messages))
+                problems.error('\n'.join(messages), filename=path)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')

@@ -88,7 +88,8 @@ def error(message: str,
     """Show an error message."""
     if ci:
         ci_error(message, filename=filename, line=line, col=col)
-    logging.error(message)
+    else:
+        logging.error(message)
 
 
 def fatal(message: str,
