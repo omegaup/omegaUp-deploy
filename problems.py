@@ -75,7 +75,6 @@ def ci_error(message: str,
     print(
         f'::error {",".join(location)}::' +
         message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'),
-        file=sys.stderr,
         flush=True)
 
 
