@@ -201,7 +201,8 @@ def _main() -> None:
                 'tests/tests.json, settings.json, outs, or testplan are '
                 'probably missing or invalid.')
             problems.error(f'Skipped {p.title}: {errorString}',
-                           filename=os.path.join(p.path, 'settings.json'))
+                           filename=os.path.join(p.path, 'settings.json'),
+                           ci=args.ci)
             continue
 
         for testResult in report.get('tests', []):
@@ -301,7 +302,7 @@ def _main() -> None:
                                     logsDirectory)
 
             for (path, messages) in failureMessages.items():
-                problems.error('\n'.join(messages), filename=path)
+                problems.error('\n'.join(messages), filename=path, ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
