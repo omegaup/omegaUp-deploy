@@ -14,7 +14,7 @@ from typing import List, Optional
 import container
 import problems
 
-_SUPPORTED_GENERATORS = frozenset(('out', 'png', 'testplan'))
+_SUPPORTED_GENERATORS = frozenset(('png', 'testplan'))
 
 
 def _getSolution(p: problems.Problem, *, rootDirectory: str,
@@ -76,75 +76,20 @@ def _generateTestplan(p: problems.Problem, *, rootDirectory: str, force: bool,
     return True
 
 
-def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
-                     ci: bool) -> bool:
-    """Generate .out files for the provided problem."""
-    logging.info('%-30s: Generating outputs for problem', p.title)
-
-    if not p.shouldGenerateOutputs(rootDirectory=rootDirectory):
-        logging.warning('%-30s: .gitignore with `**/*.out` found! Skipping.',
-                        p.title)
-        return True
-    solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
-    if solutionPath is None:
-        logging.warning('%-30s: Failed to find a solution file.', p.title)
-        return False
-    relativeSolutionPath = os.path.relpath(solutionPath, rootDirectory)
-
-    inFilenames = _getInputs(p, rootDirectory=rootDirectory, ci=ci)
-
-    # TODO: if karel, enforce examples
-    anyProblemFailure = False
-    with container.Compile(sourcePath=solutionPath, ci=ci) as c:
-        for inFilename in inFilenames:
-            relativeInFilename = os.path.relpath(inFilename, rootDirectory)
-            outFilename = f'{os.path.splitext(inFilename)[0]}.out'
-            relativeOutFilename = os.path.relpath(outFilename, rootDirectory)
-
-            logging.debug('%-30s: Generating output for %s', p.title,
-                          inFilename)
-
-            if not force and os.path.isfile(outFilename):
-                problems.fatal(
-                    (f".outs can't be present when solutions/solution.$lang$ "
-                     f"exists: {relativeOutFilename}"),
-                    filename=relativeOutFilename,
-                    ci=ci)
-
-            try:
-                c.run(inFilename,
-                      outFilename,
-                      timeout=datetime.timedelta(seconds=5))
-            except subprocess.CalledProcessError as cpe:
-                anyProblemFailure = True
-                with open(outFilename, 'r') as f:
-                    problems.error((f'{relativeSolutionPath} failed running '
-                                    f'with {relativeInFilename}:\n'
-                                    f'stdout:\n{f.read()}\n'
-                                    f'stderr:\n{cpe.stderr.decode("utf-8")}'),
-                                   filename=relativeSolutionPath,
-                                   ci=ci)
-
-    if anyProblemFailure:
-        logging.warning('%-30s: Failed generating some outputs', p.title)
-        return False
-
-    logging.info('%-30s: Success generating outputs', p.title)
-    return True
-
-
 def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
                     ci: bool) -> bool:
     """Generate .png files for the provided problem."""
-    logging.info('%-30s: Generating outputs for problem', p.title)
+    logging.info('%-30s: Generating images for problem', p.title)
 
     if p.config.get('misc', {}).get('languages') != 'karel':
-        logging.warning('%-30s: Not a karel problem! Skipping.', p.title)
+        logging.warning(
+            '%-30s: Not a karel problem! Skipping generating images.', p.title)
         return True
 
     solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
     if solutionPath is None:
-        logging.warning('%-30s: No solution found! Skipping.', p.title)
+        logging.warning(
+            '%-30s: No solution found! Skipping generating images.', p.title)
         return True
     relativeSolutionPath = os.path.relpath(solutionPath, rootDirectory)
 
@@ -208,7 +153,7 @@ def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
                                ci=ci)
 
     if anyProblemFailure:
-        logging.warning('%-30s: Failed generating some outputs', p.title)
+        logging.warning('%-30s: Failed generating some .png files', p.title)
         return False
 
     logging.info('%-30s: Success generating .png files', p.title)
@@ -216,7 +161,7 @@ def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
 
 
 def _main() -> None:
-    parser = argparse.ArgumentParser('Generate outputs')
+    parser = argparse.ArgumentParser('Generate resources')
     parser.add_argument(
         '--all',
         action='store_true',
@@ -226,7 +171,7 @@ def _main() -> None:
                         help='Signal that this is being run from the CI.')
     parser.add_argument('--force',
                         action='store_true',
-                        help='Force re-generating all outputs')
+                        help='Force re-generating all resources')
     parser.add_argument('--jobs',
                         '-j',
                         default=min(32, (os.cpu_count() or 2) + 4),
@@ -235,7 +180,7 @@ def _main() -> None:
                         default=_SUPPORTED_GENERATORS,
                         type=lambda x: set(x.split(',')),
                         help=('Comma-separated list of artifacts to generate. '
-                              'Should be a subset of {out,png,testplan}. '
+                              'Should be a subset of {png,testplan}. '
                               'Generates everything by default.'))
     parser.add_argument('--verbose',
                         action='store_true',
@@ -271,13 +216,6 @@ def _main() -> None:
                                     rootDirectory=rootDirectory,
                                     force=args.force,
                                     ci=args.ci))
-            if 'out' in args.generate:
-                futures.append(
-                    executor.submit(_generateOutputs,
-                                    p,
-                                    rootDirectory=rootDirectory,
-                                    force=args.force,
-                                    ci=args.ci))
             if 'png' in args.generate:
                 futures.append(
                     executor.submit(_generateImages,
@@ -288,7 +226,7 @@ def _main() -> None:
 
         if not all(future.result()
                    for future in concurrent.futures.as_completed(futures)):
-            logging.error('Some outputs failed to generate')
+            logging.error('Some resources failed to generate')
             sys.exit(1)
 
 
