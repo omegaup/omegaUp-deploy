@@ -300,7 +300,7 @@ def _main() -> None:
                                 contents = \
                                     contents[len(noSandboxWarning):].strip()
 
-                            if contents.isspace():
+                            if not contents or contents.isspace():
                                 continue
 
                             failureMessage = (
