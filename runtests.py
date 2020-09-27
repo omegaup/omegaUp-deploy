@@ -6,6 +6,7 @@ import decimal
 import json
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -20,6 +21,17 @@ import problems
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
 noSandboxWarning = "WARNING: Running with --disable-sandboxing"
+
+
+def _availableProcessors() -> int:
+    """Returns the number of available processors."""
+    try:
+        return len(os.sched_getaffinity(0))
+    except AttributeError:
+        # os.sched_setaffinity() is not available in all OSs. Since we don't
+        # want to speculate how many cores there are, let's be paranoid and
+        # return 0.
+        return 1
 
 
 def _threadInitializer(threadAffinityMapping: Dict[int, int],
@@ -59,23 +71,39 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     else:
         outputsArgs = []
 
-    processResult = subprocess.run([
+    if len(threadAffinityMapping) == 1:
+        # No need to involve taskset. Just run the container normally.
+        tasksetArgs = [
+            container.getImageName(ci),
+        ]
+    else:
+        # Mark the entrypoint as only being able to run in a single core.
+        tasksetArgs = [
+            '--entrypoint',
+            '/usr/bin/taskset',
+            container.getImageName(ci),
+            f'0x{2**threadAffinityMapping[threading.get_ident()]:x}',
+            '/usr/bin/omegaup-runner',
+        ]
+
+    args = [
         'docker',
         'run',
         '--rm',
         '--volume',
         f'{rootDirectory}:/src',
-        '--entrypoint',
-        '/usr/bin/taskset',
-        container.getImageName(ci),
-        f'0x{2**threadAffinityMapping[threading.get_ident()]:x}',
-        '/usr/bin/omegaup-runner',
+    ] + tasksetArgs + [
         '-oneshot=ci',
         '-input',
         p.path,
         '-results',
         os.path.relpath(problemResultsDirectory, rootDirectory),
-    ] + outputsArgs,
+    ] + outputsArgs
+
+    logging.debug('[%2d] %-30s: Running `%s`...',
+                  threadAffinityMapping[threading.get_ident()], p.title,
+                  shlex.join(args))
+    processResult = subprocess.run(args,
                                    universal_newlines=True,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
@@ -116,7 +144,8 @@ def _main() -> None:
                               'only those that have changed'))
     parser.add_argument('--jobs',
                         '-j',
-                        default=os.cpu_count(),
+                        type=int,
+                        default=_availableProcessors(),
                         help='Number of threads to run concurrently')
     parser.add_argument('--verbose',
                         action='store_true',
