@@ -19,6 +19,8 @@ import problems
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
+noSandboxWarning = "WARNING: Running with --disable-sandboxing"
+
 
 def _threadInitializer(threadAffinityMapping: Dict[int, int],
                        lock: threading.Lock) -> None:
@@ -201,7 +203,8 @@ def _main() -> None:
                 'tests/tests.json, settings.json, outs, or testplan are '
                 'probably missing or invalid.')
             problems.error(f'Skipped {p.title}: {errorString}',
-                           filename=os.path.join(p.path, 'settings.json'))
+                           filename=os.path.join(p.path, 'settings.json'),
+                           ci=args.ci)
             continue
 
         for testResult in report.get('tests', []):
@@ -250,7 +253,6 @@ def _main() -> None:
                 if 'compile_error' in testResult['result']:
                     failureMessage = f"{testedFile}:\n" + textwrap.indent(
                         testResult['result']['compile_error'], '    ')
-                    logging.info(failureMessage)
                     failureMessages[testedFile].append(failureMessage)
                 if testResult['result']['groups'] is not None:
                     for group in testResult['result']['groups']:
@@ -263,8 +265,7 @@ def _main() -> None:
                                 f'{c["score"]*100:6.2f}% | {c["verdict"]:3}')
                         groupReportTable.append(
                             f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
-                    for line in groupReportTable:
-                        logging.info('%71s%s', '', line)
+
                     failureMessages[testResult['filename']].append(
                         '\n'.join(groupReportTable))
 
@@ -293,19 +294,31 @@ def _main() -> None:
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
+                            contents = out.read().strip()
+
+                            if contents.startswith(noSandboxWarning):
+                                contents = \
+                                    contents[len(noSandboxWarning):].strip()
+
+                            if contents.isspace():
+                                continue
+
                             failureMessage = (
                                 f"{stderrFilename}:"
-                                f"\n{textwrap.indent(out.read(), '    ')}")
-                            logging.info(failureMessage)
+                                f"\n{textwrap.indent(contents, '    ')}")
+
                             failureMessages[associatedFile].append(
                                 failureMessage)
                 else:
                     logging.warning('Logs directory %r not found.',
                                     logsDirectory)
 
-            if args.ci:
-                for (path, messages) in failureMessages.items():
-                    problems.ci_error('\n'.join(messages), filename=path)
+            for (path, messages) in failureMessages.items():
+                problems.error(f'Validation failed for problem: {p.title}\n'
+                               + f'Related file: {path}\n'
+                               + '\n'.join(messages),
+                               filename=path,
+                               ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')

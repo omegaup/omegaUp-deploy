@@ -144,7 +144,7 @@ class Compile:
         *,
         stdinPath: Optional[str] = None,
         stdoutPath: Optional[str] = None,
-        timeout: datetime.timedelta = datetime.timedelta(seconds=5)
+        timeout: datetime.timedelta = datetime.timedelta(seconds=10)
     ) -> None:
         """Run an arbitrary command in the container."""
         logging.debug('Invoking command in container: "%s"', ' '.join(args))
