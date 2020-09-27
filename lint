@@ -4,7 +4,7 @@ set -e
 
 ROOT="$(git rev-parse --show-superproject-working-tree --show-toplevel | \
         head -n1)"
-CONTAINER_IMAGE=omegaup/hook_tools:20200925
+CONTAINER_IMAGE=omegaup/hook_tools:20200927
 
 if [[ $# != 0 ]]; then
 	# The caller has given us the explicit arguments.
