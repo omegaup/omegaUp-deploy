@@ -30,7 +30,7 @@ def _availableProcessors() -> int:
     except AttributeError:
         # os.sched_setaffinity() is not available in all OSs. Since we don't
         # want to speculate how many cores there are, let's be paranoid and
-        # return 0.
+        # return 1.
         return 1
 
 
