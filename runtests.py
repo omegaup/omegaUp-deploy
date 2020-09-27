@@ -266,7 +266,7 @@ def _main() -> None:
                         groupReportTable.append(
                             f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
 
-                    failureMessages[testResult['filename']].append(
+                    failureMessages[testedFile].append(
                         '\n'.join(groupReportTable))
 
                     failedCases = {
