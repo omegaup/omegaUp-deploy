@@ -292,9 +292,18 @@ def _main() -> None:
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
+                            contents = out.read()
+
+                            if contents.startswith(noSandboxWarning):
+                                return text[len(noSandboxWarning):]
+                            
+                            if contents.isspace():
+                                continue
+
                             failureMessage = (
                                 f"{stderrFilename}:"
-                                f"\n{textwrap.indent(out.read(), '    ')}")
+                                f"\n{textwrap.indent(contents, '    ')}")
+
                             failureMessages[associatedFile].append(
                                 failureMessage)
                 else:
@@ -302,7 +311,11 @@ def _main() -> None:
                                     logsDirectory)
 
             for (path, messages) in failureMessages.items():
-                problems.error('\n'.join(messages), filename=path, ci=args.ci)
+                problems.error(f'Validation failed for problem: {p.title}\n'
+                                 + f'Related file: {path}\n'
+                                 + '\n'.join(messages),
+                               filename=path,
+                               ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')

@@ -76,66 +76,6 @@ def _generateTestplan(p: problems.Problem, *, rootDirectory: str, force: bool,
     return True
 
 
-<<<<<<< HEAD:generateouts.py
-def _generateOutputs(p: problems.Problem, *, rootDirectory: str, force: bool,
-                     ci: bool) -> bool:
-    """Generate .out files for the provided problem."""
-    logging.info('%-30s: Generating outputs for problem', p.title)
-
-    if not p.shouldGenerateOutputs(rootDirectory=rootDirectory):
-        logging.warning('%-30s: .gitignore with `**/*.out` found! Skipping.',
-                        p.title)
-        return True
-    solutionPath = _getSolution(p, rootDirectory=rootDirectory, ci=ci)
-    if solutionPath is None:
-        logging.warning('%-30s: Failed to find a solution file.', p.title)
-        return False
-    relativeSolutionPath = os.path.relpath(solutionPath, rootDirectory)
-
-    inFilenames = _getInputs(p, rootDirectory=rootDirectory, ci=ci)
-
-    # TODO: if karel, enforce examples
-    anyProblemFailure = False
-    with container.Compile(sourcePath=solutionPath, ci=ci) as c:
-        for inFilename in inFilenames:
-            relativeInFilename = os.path.relpath(inFilename, rootDirectory)
-            outFilename = f'{os.path.splitext(inFilename)[0]}.out'
-            relativeOutFilename = os.path.relpath(outFilename, rootDirectory)
-
-            logging.debug('%-30s: Generating output for %s', p.title,
-                          inFilename)
-
-            if not force and os.path.isfile(outFilename):
-                problems.fatal(
-                    (f".outs can't be present when solutions/solution.$lang$ "
-                     f"exists: {relativeOutFilename}"),
-                    filename=relativeOutFilename,
-                    ci=ci)
-
-            try:
-                c.run(inFilename,
-                      outFilename,
-                      timeout=datetime.timedelta(seconds=10))
-            except subprocess.CalledProcessError as cpe:
-                anyProblemFailure = True
-                with open(outFilename, 'r') as f:
-                    problems.error((f'{relativeSolutionPath} failed running '
-                                    f'with {relativeInFilename}:\n'
-                                    f'stdout:\n{f.read()}\n'
-                                    f'stderr:\n{cpe.stderr.decode("utf-8")}'),
-                                   filename=relativeSolutionPath,
-                                   ci=ci)
-
-    if anyProblemFailure:
-        logging.warning('%-30s: Failed generating some outputs', p.title)
-        return False
-
-    logging.info('%-30s: Success generating outputs', p.title)
-    return True
-
-
-=======
->>>>>>> origin/master:generateresources.py
 def _generateImages(p: problems.Problem, *, rootDirectory: str, force: bool,
                     ci: bool) -> bool:
     """Generate .png files for the provided problem."""
