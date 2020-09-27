@@ -20,7 +20,7 @@ import problems
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
-noSandboxWarning = "WARNING: Running with --disable-sandboxing"
+_SANDBOX_DISABLED_WARNING = 'WARNING: Running with --disable-sandboxing'
 
 
 def _availableProcessors() -> int:
@@ -50,7 +50,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
                  threadAffinityMapping[threading.get_ident()], p.title)
 
     problemResultsDirectory = os.path.join(resultsDirectory, p.path)
-    problemOutputsDirectory = os.path.join(resultsDirectory, p.path, "outputs")
+    problemOutputsDirectory = os.path.join(resultsDirectory, p.path, 'outputs')
     os.makedirs(problemOutputsDirectory)
     # The results are written with the container's UID, which does not
     # necessarily match the caller's UID. To avoid that problem, we create
@@ -325,16 +325,16 @@ def _main() -> None:
                                   'r') as out:
                             contents = out.read().strip()
 
-                            if contents.startswith(noSandboxWarning):
-                                contents = \
-                                    contents[len(noSandboxWarning):].strip()
+                            if contents.startswith(_SANDBOX_DISABLED_WARNING):
+                                contents = contents[
+                                    len(_SANDBOX_DISABLED_WARNING):].strip()
 
-                            if not contents or contents.isspace():
+                            if not contents:
                                 continue
 
                             failureMessage = (
-                                f"{stderrFilename}:"
-                                f"\n{textwrap.indent(contents, '    ')}")
+                                f'{stderrFilename}:'
+                                f'\n{textwrap.indent(contents, "    ")}')
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
@@ -343,11 +343,11 @@ def _main() -> None:
                                     logsDirectory)
 
             for (path, messages) in failureMessages.items():
-                problems.error(f'Validation failed for problem: {p.title}\n'
-                               + f'Related file: {path}\n'
-                               + '\n'.join(messages),
-                               filename=path,
-                               ci=args.ci)
+                problems.error(
+                    (f'Validation failed for problem: {p.title}\n'
+                     f'Related file: {path}\n') + '\n'.join(messages),
+                    filename=path,
+                    ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
