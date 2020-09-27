@@ -19,7 +19,7 @@ import problems
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
-noSandboxWarning = "WARNING: Running with --disable-sandboxing\n"
+noSandboxWarning = "WARNING: Running with --disable-sandboxing"
 
 
 def _threadInitializer(threadAffinityMapping: Dict[int, int],
@@ -294,10 +294,10 @@ def _main() -> None:
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
-                            contents = out.read()
+                            contents = out.read().strip()
 
                             if contents.startswith(noSandboxWarning):
-                                return text[len(noSandboxWarning):]
+                                contents = contents[len(noSandboxWarning):].strip()
                             
                             if contents.isspace():
                                 continue
