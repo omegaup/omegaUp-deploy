@@ -195,7 +195,8 @@ def _main() -> None:
         for p in problems.problems(allProblems=args.all,
                                    rootDirectory=rootDirectory,
                                    problemPaths=args.problem_paths):
-            if args.overwrite_outs:
+            if (p.shouldGenerateOutputs(rootDirectory=rootDirectory)
+                    and args.overwrite_outs):
                 logging.info('[  ] %-30s: Removing old .out files...', p.title)
                 for filename in os.listdir(
                         os.path.join(rootDirectory, p.path, 'cases')):
