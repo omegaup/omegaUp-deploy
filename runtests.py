@@ -266,7 +266,7 @@ def _main() -> None:
                         groupReportTable.append(
                             f'{"-"*20}-+-{"-"*20}-+-{"-"*7}-+-{"-"*7}')
 
-                    failureMessages[testedFile].append(
+                    failureMessages[testResult['filename']].append(
                         '\n'.join(groupReportTable))
 
                     failedCases = {
@@ -297,8 +297,9 @@ def _main() -> None:
                             contents = out.read().strip()
 
                             if contents.startswith(noSandboxWarning):
-                                contents = contents[len(noSandboxWarning):].strip()
-                            
+                                contents =
+                                    contents[len(noSandboxWarning):].strip()
+
                             if contents.isspace():
                                 continue
 
@@ -314,8 +315,8 @@ def _main() -> None:
 
             for (path, messages) in failureMessages.items():
                 problems.error(f'Validation failed for problem: {p.title}\n'
-                                 + f'Related file: {path}\n'
-                                 + '\n'.join(messages),
+                               + f'Related file: {path}\n'
+                               + '\n'.join(messages),
                                filename=path,
                                ci=args.ci)
 
