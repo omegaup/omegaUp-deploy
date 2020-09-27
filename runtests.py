@@ -297,7 +297,7 @@ def _main() -> None:
                             contents = out.read().strip()
 
                             if contents.startswith(noSandboxWarning):
-                                contents =
+                                contents = \
                                     contents[len(noSandboxWarning):].strip()
 
                             if contents.isspace():
