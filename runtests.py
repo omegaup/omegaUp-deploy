@@ -19,6 +19,8 @@ import problems
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
+noSandboxWarning = "WARNING: Running with --disable-sandboxing\n"
+
 
 def _threadInitializer(threadAffinityMapping: Dict[int, int],
                        lock: threading.Lock) -> None:
