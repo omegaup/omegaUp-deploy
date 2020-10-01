@@ -6,6 +6,7 @@ import decimal
 import json
 import logging
 import os
+import os.path
 import shlex
 import shutil
 import subprocess
@@ -120,9 +121,14 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     with open(os.path.join(problemResultsDirectory, 'ci.log'), 'w') as f:
         f.write(processResult.stderr)
 
-    for filename in os.listdir(problemOutputsDirectory):
-        shutil.copy(os.path.join(problemOutputsDirectory, filename),
-                    os.path.join(rootDirectory, p.path, 'cases', filename))
+    for root, _, filenames in os.walk(problemOutputsDirectory):
+        for filename in filenames:
+            shutil.copy(
+                os.path.join(root, filename),
+                os.path.join(
+                    rootDirectory, p.path,
+                    os.path.relpath(os.path.join(root, filename),
+                                    problemOutputsDirectory)))
 
     report = json.loads(processResult.stdout)
     logging.info('[%2d] %-30s: %s',
