@@ -7,7 +7,7 @@ ssh-add -D
 ssh-add ~/.ssh/id_rsa_*
 
 cd ..
-git add .
+git add -f .
 git commit -m "Generated files from $GITHUB_SHA"
 git checkout public
 git merge --no-commit --no-ff -X theirs master
