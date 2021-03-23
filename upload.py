@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 import zipfile
 
-from typing import Any, Mapping
+from typing import Any, Mapping, Set
 
 import omegaup.api
 import problems
@@ -137,8 +137,11 @@ def uploadProblemZip(client: omegaup.api.Client,
 
         desiredAdmins = {admin.lower() for admin in targetAdmins}
 
-        adminsToRemove = admins - desiredAdmins - {client.username.lower()}
-        adminsToAdd = desiredAdmins - admins - {client.username.lower()}
+        clientAdmin: Set[str] = set()
+        if client.username:
+            clientAdmin.add(client.username.lower())
+        adminsToRemove = admins - desiredAdmins - clientAdmin
+        adminsToAdd = desiredAdmins - admins - clientAdmin
 
         for admin in adminsToAdd:
             logging.info('Adding problem admin: %s', admin)

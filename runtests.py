@@ -194,7 +194,7 @@ def _main() -> None:
     threadAffinityMapping: Dict[int, int] = {}
     threadAffinityMappingLock = threading.Lock()
     with concurrent.futures.ThreadPoolExecutor(
-            max_workers=min(os.cpu_count(), args.jobs),
+            max_workers=min(os.cpu_count() or 1, args.jobs),
             initializer=_threadInitializer,
             initargs=(threadAffinityMapping,
                       threadAffinityMappingLock)) as executor:
