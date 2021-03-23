@@ -14,7 +14,7 @@ pycodestyle = ">=2.6.0"
 [packages]
 
 libkarel = ">=1.0.2"
-omegaup = ">=1.1.1"
+omegaup = ">=1.2.0"
 
 
 [requires]

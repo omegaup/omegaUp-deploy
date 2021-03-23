@@ -229,16 +229,21 @@ def _main() -> None:
     parser.add_argument('--url',
                         default='https://omegaup.com',
                         help='URL of the omegaUp host.')
+    parser.add_argument('--api-token',
+                        type=str,
+                        default=env.get('OMEGAUP_API_TOKEN'))
     parser.add_argument('-u',
                         '--username',
                         type=str,
                         default=env.get('OMEGAUPUSER'),
-                        required='OMEGAUPUSER' not in env)
+                        required=('OMEGAUPUSER' not in env
+                                  and 'OMEGUAP_API_TOKEN' not in env))
     parser.add_argument('-p',
                         '--password',
                         type=str,
                         default=env.get('OMEGAUPPASS'),
-                        required='OMEGAUPPASS' not in env)
+                        required=('OMEGAUPPASS' not in env
+                                  and 'OMEGUAP_API_TOKEN' not in env))
     parser.add_argument('--can-create',
                         action='store_true',
                         help=("Whether it's allowable to create the "
@@ -255,6 +260,7 @@ def _main() -> None:
 
     client = omegaup.api.Client(username=args.username,
                                 password=args.password,
+                                api_token=args.api_token,
                                 url=args.url)
 
     if env.get('GITHUB_ACTIONS'):
