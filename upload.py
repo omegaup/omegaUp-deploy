@@ -246,7 +246,7 @@ def _main() -> None:
                         type=str,
                         default=env.get('OMEGAUPPASS'),
                         required=('OMEGAUPPASS' not in env
-                                  and 'OMEGUAP_API_TOKEN' not in env))
+                                  and 'OMEGAUP_API_TOKEN' not in env))
     parser.add_argument('--can-create',
                         action='store_true',
                         help=("Whether it's allowable to create the "
