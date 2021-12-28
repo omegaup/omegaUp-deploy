@@ -82,7 +82,8 @@ def uploadProblemZip(client: omegaup.api.Client,
         'validator': validator['name'],
         'validator_time_limit': validator['limits']['TimeLimit'],
         'email_clarifications': misc['email_clarifications'],
-        'group_score_policy': misc.get('group_score_policy', 'sum-if-not-zero'),
+        'group_score_policy': misc.get('group_score_policy',
+                                       'sum-if-not-zero'),
     }
 
     exists = client.problem.details(problem_alias=alias,
