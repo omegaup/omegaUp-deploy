@@ -257,7 +257,10 @@ def _main() -> None:
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']))
             else:
-                expected = {'verdict': 'AC'}
+                if testResult['type'] == 'invalid-inputs':
+                    expected = {'verdict': 'WA'}
+                else:
+                    expected = {'verdict': 'AC'}
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']),
                                              'validator')
@@ -268,7 +271,7 @@ def _main() -> None:
             }
 
             logging.info(
-                f'    {testResult["type"]:10} | '
+                f'    {testResult["type"][:10]:10} | '
                 f'{testResult["filename"][:40]:40} | '
                 f'{testResult["state"]:8} | '
                 f'expected={expected} got={got} | '
