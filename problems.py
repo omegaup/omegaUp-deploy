@@ -110,7 +110,7 @@ def problems(allProblems: bool = False,
 
     If `allProblems` is passed, all the problems that are declared in
     `problems.json` will be returned. Otherwise, only those that have
-    differences with `upstream/master`.
+    differences with `upstream/main`.
     """
     env = os.environ
     if rootDirectory is None:
@@ -152,7 +152,7 @@ def problems(allProblems: bool = False,
     elif env.get('GITHUB_BASE_COMMIT'):
         commitRange = env['GITHUB_BASE_COMMIT'] + '...HEAD'
     else:
-        commitRange = 'origin/master...HEAD'
+        commitRange = 'origin/main...HEAD'
 
     changes = subprocess.check_output(
         ['git', 'diff', '--name-only', '--diff-filter=AMDR', commitRange],
