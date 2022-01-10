@@ -243,11 +243,15 @@ def _main() -> None:
                            ci=args.ci)
             continue
 
-        for testResult in report.get('tests', []):
-            testedFile = os.path.normpath(
-                os.path.join(p.path, 'tests', testResult['filename']))
+        testConfigPath = os.path.join(p.path, 'tests', 'tests.json')
+        with open(testConfigPath as testConfigF:
+            testConfig = json.load(testConfigF)
 
+        for testResult in report.get('tests', []):
             if testResult['type'] == 'solutions':
+                testedFile = os.path.normpath(
+                    os.path.join(p.path, 'tests', testResult['filename']))
+            
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
                 if not expected:
@@ -258,8 +262,12 @@ def _main() -> None:
                                              str(testResult['index']))
             else:
                 if testResult['type'] == 'invalid-inputs':
+                    testedFile = os.path.normpath(
+                        os.path.join(p.path, 'tests', 'invalid-inputs', testResult['filename']))
                     expected = {'verdict': 'WA'}
                 else:
+                    testedFile = os.path.normpath(
+                        os.path.join(p.path, 'cases', testResult['filename']))
                     expected = {'verdict': 'AC'}
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']),
@@ -282,6 +290,27 @@ def _main() -> None:
 
             normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
+
+            if testResult['type'] == 'invalid-inputs':
+                # Check that the validator output matches what we expected.
+
+                if testConfig['inputs']['validator_expected_invalid_stderr'] is None:
+                    failureMessage[testConfigPath].append(
+                        'All invalid inputs must have an associated expected failure.')
+                elif testResult['result']['groups'] is not None:
+                    expectedErrors = testConfig['inputs']['expected_invalid_stderr']
+                    for group in testResult['result']['groups']:
+                        for case in group['cases']:
+                            expectedError = expectedErrors.get(case[name])
+                            if expectedError is None:
+                                failureMessage[testConfigPath].append(
+                                    f'Missing expected failure string for invalid case: {case['name']}')
+                            elif:
+                                stderrPath = os.path.join(logsDirectory, case['name']+'.err')
+                                with open(stderrPath, 'r') as validatorOutput:
+                                    if expectedError not in validatorOutput:
+                                        failureMessage[testedFile].append(
+                                            'Expected failure string not found in validator output.')
 
             if testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
