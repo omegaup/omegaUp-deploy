@@ -251,7 +251,7 @@ def _main() -> None:
             if testResult['type'] == 'solutions':
                 testedFile = os.path.normpath(
                     os.path.join(p.path, 'tests', testResult['filename']))
-            
+
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
                 if not expected:
@@ -263,11 +263,16 @@ def _main() -> None:
             else:
                 if testResult['type'] == 'invalid-inputs':
                     testedFile = os.path.normpath(
-                        os.path.join(p.path, 'tests', 'invalid-inputs', testResult['filename']))
+                        os.path.join(p.path,
+                                     'tests',
+                                     'invalid-inputs',
+                                     testResult['filename']))
                     expected = {'verdict': 'WA'}
                 else:
                     testedFile = os.path.normpath(
-                        os.path.join(p.path, 'cases', testResult['filename']))
+                        os.path.join(p.path,
+                                     'cases',
+                                     testResult['filename']))
                     expected = {'verdict': 'AC'}
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']),
@@ -294,23 +299,27 @@ def _main() -> None:
             if testResult['type'] == 'invalid-inputs':
                 # Check that the validator output matches what we expected.
 
-                if testConfig['inputs']['validator_expected_invalid_stderr'] is None:
+                allErrors = testConfig['inputs'].get(
+                                       'validator_expected_invalid_stderr')
+                if allErrors is None:
                     failureMessages[testConfigPath].append(
-                        'All invalid inputs must have an associated expected failure.')
+                        'Invalid inputs must associated expected failures.')
                 elif testResult['result']['groups'] is not None:
-                    expectedErrors = testConfig['inputs']['expected_invalid_stderr']
                     for group in testResult['result']['groups']:
                         for case in group['cases']:
-                            expectedError = expectedErrors.get(case['name'])
+                            expectedError = allErrors.get(case['name'])
                             if expectedError is None:
                                 failureMessages[testConfigPath].append(
-                                    f'Missing expected failure string for invalid case: {case["name"]}')
-                            elif:
-                                stderrPath = os.path.join(logsDirectory, case['name']+'.err')
+                                    f'Missing expected failure string ' +
+                                    f'for invalid case: {case["name"]}')
+                            else:
+                                stderrPath = os.path.join(logsDirectory,
+                                                          case['name']+'.err')
                                 with open(stderrPath, 'r') as validatorOutput:
                                     if expectedError not in validatorOutput:
                                         failureMessages[testedFile].append(
-                                            'Expected failure string not found in validator output.')
+                                            'Expected failure string not ' +
+                                            'found in validator output.')
 
             if testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
