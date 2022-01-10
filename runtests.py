@@ -303,7 +303,7 @@ def _main() -> None:
                                        'validator_expected_invalid_stderr')
                 if allErrors is None:
                     failureMessages[testConfigPath].append(
-                        'Invalid inputs must associated expected failures.')
+                        'Invalid inputs must have associated failure strings.')
                 elif testResult['result']['groups'] is not None:
                     for group in testResult['result']['groups']:
                         for case in group['cases']:
@@ -396,6 +396,9 @@ def _main() -> None:
                      f'Related file: {path}\n') + '\n'.join(messages),
                     filename=path,
                     ci=args.ci)
+            
+            if not failureMessages:
+                anyFailure = True
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
