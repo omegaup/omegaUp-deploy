@@ -244,7 +244,7 @@ def _main() -> None:
             continue
 
         testConfigPath = os.path.join(p.path, 'tests', 'tests.json')
-        with open(testConfigPath as testConfigF:
+        with open(testConfigPath) as testConfigF:
             testConfig = json.load(testConfigF)
 
         for testResult in report.get('tests', []):
@@ -295,21 +295,21 @@ def _main() -> None:
                 # Check that the validator output matches what we expected.
 
                 if testConfig['inputs']['validator_expected_invalid_stderr'] is None:
-                    failureMessage[testConfigPath].append(
+                    failureMessages[testConfigPath].append(
                         'All invalid inputs must have an associated expected failure.')
                 elif testResult['result']['groups'] is not None:
                     expectedErrors = testConfig['inputs']['expected_invalid_stderr']
                     for group in testResult['result']['groups']:
                         for case in group['cases']:
-                            expectedError = expectedErrors.get(case[name])
+                            expectedError = expectedErrors.get(case['name'])
                             if expectedError is None:
-                                failureMessage[testConfigPath].append(
-                                    f'Missing expected failure string for invalid case: {case['name']}')
+                                failureMessages[testConfigPath].append(
+                                    f'Missing expected failure string for invalid case: {case["name"]}')
                             elif:
                                 stderrPath = os.path.join(logsDirectory, case['name']+'.err')
                                 with open(stderrPath, 'r') as validatorOutput:
                                     if expectedError not in validatorOutput:
-                                        failureMessage[testedFile].append(
+                                        failureMessages[testedFile].append(
                                             'Expected failure string not found in validator output.')
 
             if testResult['state'] != 'passed':
