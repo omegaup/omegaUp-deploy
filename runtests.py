@@ -396,7 +396,7 @@ def _main() -> None:
                      f'Related file: {path}\n') + '\n'.join(messages),
                     filename=path,
                     ci=args.ci)
-            
+
             if not failureMessages:
                 anyFailure = True
 
