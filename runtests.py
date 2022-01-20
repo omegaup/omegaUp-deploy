@@ -243,10 +243,6 @@ def _main() -> None:
                            ci=args.ci)
             continue
 
-        testConfigPath = os.path.join(p.path, 'tests', 'tests.json')
-        with open(testConfigPath) as testConfigF:
-            testConfig = json.load(testConfigF)
-
         for testResult in report.get('tests', []):
             if testResult['type'] == 'solutions':
                 testedFile = os.path.normpath(
@@ -295,31 +291,6 @@ def _main() -> None:
 
             normalizedScore = decimal.Decimal(got.get('score', 0))
             scaledScore = round(normalizedScore, 15) * 100
-
-            if testResult['type'] == 'invalid-inputs':
-                # Check that the validator output matches what we expected.
-
-                allErrors = testConfig['inputs'].get(
-                                       'validator_expected_invalid_stderr')
-                if allErrors is None:
-                    failureMessages[testConfigPath].append(
-                        'Invalid inputs must have associated failure strings.')
-                elif testResult['result']['groups'] is not None:
-                    for group in testResult['result']['groups']:
-                        for case in group['cases']:
-                            expectedError = allErrors.get(case['name'])
-                            if expectedError is None:
-                                failureMessages[testConfigPath].append(
-                                    f'Missing expected failure string ' +
-                                    f'for invalid case: {case["name"]}')
-                            else:
-                                stderrPath = os.path.join(logsDirectory,
-                                                          case['name']+'.err')
-                                with open(stderrPath, 'r') as validatorOutput:
-                                    if expectedError not in validatorOutput:
-                                        failureMessages[testedFile].append(
-                                            'Expected failure string not ' +
-                                            'found in validator output.')
 
             if testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
@@ -396,9 +367,6 @@ def _main() -> None:
                      f'Related file: {path}\n') + '\n'.join(messages),
                     filename=path,
                     ci=args.ci)
-
-            if not failureMessages:
-                anyFailure = True
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
