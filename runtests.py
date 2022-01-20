@@ -244,10 +244,10 @@ def _main() -> None:
             continue
 
         for testResult in report.get('tests', []):
-            testedFile = os.path.normpath(
-                os.path.join(p.path, 'tests', testResult['filename']))
-
             if testResult['type'] == 'solutions':
+                testedFile = os.path.normpath(
+                    os.path.join(p.path, 'tests', testResult['filename']))
+
                 expected = dict(testResult['solution'])
                 del (expected['filename'])
                 if not expected:
@@ -258,8 +258,17 @@ def _main() -> None:
                                              str(testResult['index']))
             else:
                 if testResult['type'] == 'invalid-inputs':
+                    testedFile = os.path.normpath(
+                        os.path.join(p.path,
+                                     'tests',
+                                     'invalid-inputs',
+                                     testResult['filename']))
                     expected = {'verdict': 'WA'}
                 else:
+                    testedFile = os.path.normpath(
+                        os.path.join(p.path,
+                                     'cases',
+                                     testResult['filename']))
                     expected = {'verdict': 'AC'}
                 logsDirectory = os.path.join(problemResultsDirectory,
                                              str(testResult['index']),
