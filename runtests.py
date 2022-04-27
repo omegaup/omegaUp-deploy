@@ -254,8 +254,6 @@ def _main() -> None:
                     # If there are no constraints, by default expect the run to
                     # be accepted.
                     expected['verdict'] = 'AC'
-                logsDirectory = os.path.join(problemResultsDirectory,
-                                             str(testResult['index']))
             else:
                 if testResult['type'] == 'invalid-inputs':
                     testedFile = os.path.normpath(
@@ -270,9 +268,12 @@ def _main() -> None:
                                      'cases',
                                      testResult['filename']))
                     expected = {'verdict': 'AC'}
-                logsDirectory = os.path.join(problemResultsDirectory,
-                                             str(testResult['index']),
-                                             'validator')
+
+            logsDirectory = os.path.join(problemResultsDirectory,
+                                         str(testResult['index']))
+
+            if os.path.isdir(os.path.join(logsDirectory, 'validator')):
+                logsDirectory = os.path.join(logsDirectory, 'validator')
 
             got = {
                 'verdict': testResult.get('result', {}).get('verdict'),
