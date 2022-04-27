@@ -67,7 +67,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     if p.shouldGenerateOutputs(rootDirectory=rootDirectory):
         outputsArgs = [
             '-outputs',
-            os.path.relpath(problemOutputsDirectory, rootDirectory),
+            '/outputs'
         ]
     else:
         outputsArgs = []
@@ -93,12 +93,16 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
         '--rm',
         '--volume',
         f'{rootDirectory}:/src',
+        '--volume',
+        f'{problemResultsDirectory}:/results',
+        '--volume',
+        f'{problemOutputsDirectory}:/outputs',
     ] + tasksetArgs + [
         '-oneshot=ci',
         '-input',
         p.path,
         '-results',
-        os.path.relpath(problemResultsDirectory, rootDirectory),
+        '/results'
     ] + outputsArgs
 
     logging.debug('[%2d] %-30s: Running `%s`...',
