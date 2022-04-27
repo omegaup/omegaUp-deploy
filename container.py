@@ -89,6 +89,8 @@ class Compile:
         try:
             self.run_command([
                 '/var/lib/omegajail/bin/omegajail',
+                '--root',
+                '/var/lib/omegajail',
                 '--homedir',
                 '/src',
                 '--homedir-writable',
