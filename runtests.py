@@ -377,8 +377,9 @@ def _main() -> None:
                     filename=path,
                     ci=args.ci)
 
-        problems.warning(f'Missing invalid test cases for problem: {p.title}',
-                         ci=args.ci)
+        if not foundInvalidInputs:
+            problems.warning(f'Missing invalid inputs for problem: {p.title}',
+                             ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
