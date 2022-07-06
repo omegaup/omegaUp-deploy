@@ -235,10 +235,11 @@ def _main() -> None:
             anyFailure = True
 
         if report['state'] in ['error', 'skipped']:
-            errorString = report['error'] or (
-                'tests/tests.json, settings.json, outs, or testplan are '
-                'probably missing or invalid.')
-            problems.error(f'Skipped {p.title}: {errorString}',
+            errorString = report.get('error',
+                                     'tests/tests.json, settings.json, outs, '
+                                     'or testplan are probably missing '
+                                     'or invalid.')
+            problems.error(f'{report["state"]} {p.title}: {errorString}',
                            filename=os.path.join(p.path, 'settings.json'),
                            ci=args.ci)
             if report['state'] == 'skipped':
@@ -297,7 +298,9 @@ def _main() -> None:
             normalizedScore = decimal.Decimal(got['score'])
             scaledScore = round(normalizedScore, 15) * 100
 
-            if testResult['state'] != 'passed':
+            if testResult['state'] == 'error':
+                failureMessages[testedFile].append(testResult['error'])
+            elif testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
                 groupReportTable = [
                     f'{"group":20} | {"case":20} | {"score":7} | {"verdict"}',
