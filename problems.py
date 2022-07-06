@@ -59,7 +59,7 @@ def enumerateFullPath(path: str) -> List[str]:
     return [os.path.join(path, f) for f in os.listdir(path)]
 
 
-def ci_message(kind:str,
+def ci_message(kind: str,
                message: str,
                *,
                filename: Optional[str] = None,
