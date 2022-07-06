@@ -294,7 +294,7 @@ def _main() -> None:
             failureMessages: DefaultDict[
                 str, List[str]] = collections.defaultdict(list)
 
-            normalizedScore = decimal.Decimal(got['score']))
+            normalizedScore = decimal.Decimal(got['score'])
             scaledScore = round(normalizedScore, 15) * 100
 
             if testResult['state'] != 'passed':
