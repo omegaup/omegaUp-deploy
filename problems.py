@@ -59,11 +59,12 @@ def enumerateFullPath(path: str) -> List[str]:
     return [os.path.join(path, f) for f in os.listdir(path)]
 
 
-def ci_error(message: str,
-             *,
-             filename: Optional[str] = None,
-             line: Optional[int] = None,
-             col: Optional[int] = None) -> None:
+def ci_message(kind: str,
+               message: str,
+               *,
+               filename: Optional[str] = None,
+               line: Optional[int] = None,
+               col: Optional[int] = None) -> None:
     """Show an error message, only on the CI."""
     location = []
     if filename is not None:
@@ -73,7 +74,7 @@ def ci_error(message: str,
     if col is not None:
         location.append(f'col={col}')
     print(
-        f'::error {",".join(location)}::' +
+        f'::{kind} {",".join(location)}::' +
         message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'),
         file=sys.stderr,
         flush=True)
@@ -87,9 +88,22 @@ def error(message: str,
           ci: bool = False) -> None:
     """Show an error message."""
     if ci:
-        ci_error(message, filename=filename, line=line, col=col)
+        ci_message('error', message, filename=filename, line=line, col=col)
     else:
         logging.error(message)
+
+
+def warning(message: str,
+            *,
+            filename: Optional[str] = None,
+            line: Optional[int] = None,
+            col: Optional[int] = None,
+            ci: bool = False) -> None:
+    """Show an error message."""
+    if ci:
+        ci_message('warning', message, filename=filename, line=line, col=col)
+    else:
+        logging.warning(message)
 
 
 def fatal(message: str,

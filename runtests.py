@@ -234,14 +234,18 @@ def _main() -> None:
         if report['state'] != 'passed':
             anyFailure = True
 
-        if report['state'] == 'skipped':
-            errorString = report['error'] or (
-                'tests/tests.json, settings.json, outs, or testplan are '
-                'probably missing or invalid.')
-            problems.error(f'Skipped {p.title}: {errorString}',
+        if report['state'] in ['error', 'skipped']:
+            errorString = report.get('error',
+                                     'tests/tests.json, settings.json, outs, '
+                                     'or testplan are probably missing '
+                                     'or invalid.')
+            problems.error(f'{report["state"]} {p.title}: {errorString}',
                            filename=os.path.join(p.path, 'settings.json'),
                            ci=args.ci)
-            continue
+            if report['state'] == 'skipped':
+                continue
+
+        foundInvalidInputs = False
 
         for testResult in report.get('tests', []):
             if testResult['type'] == 'solutions':
@@ -262,6 +266,7 @@ def _main() -> None:
                                      'invalid-inputs',
                                      testResult['filename']))
                     expected = {'verdict': 'WA'}
+                    foundInvalidInputs = True
                 else:
                     testedFile = os.path.normpath(
                         os.path.join(p.path,
@@ -276,8 +281,8 @@ def _main() -> None:
                 logsDirectory = os.path.join(logsDirectory, 'validator')
 
             got = {
-                'verdict': testResult.get('result', {}).get('verdict'),
-                'score': testResult.get('result', {}).get('score'),
+                'verdict': testResult.get('result', {}).get('verdict', 'JE'),
+                'score': testResult.get('result', {}).get('score', 0),
             }
 
             logging.info(
@@ -290,10 +295,12 @@ def _main() -> None:
             failureMessages: DefaultDict[
                 str, List[str]] = collections.defaultdict(list)
 
-            normalizedScore = decimal.Decimal(got.get('score', 0))
+            normalizedScore = decimal.Decimal(got['score'])
             scaledScore = round(normalizedScore, 15) * 100
 
-            if testResult['state'] != 'passed':
+            if testResult['state'] == 'error':
+                failureMessages[testedFile].append(testResult['error'])
+            elif testResult['state'] != 'passed':
                 # Build a table that reports groups and case verdicts.
                 groupReportTable = [
                     f'{"group":20} | {"case":20} | {"score":7} | {"verdict"}',
@@ -321,7 +328,8 @@ def _main() -> None:
                     failedCases = {
                         c['name']
                         for g in testResult['result']['groups']
-                        for c in g['cases'] if c['verdict'] != 'AC'
+                        for c in g['cases']
+                        if c['verdict'] != expected['verdict']
                     }
                 else:
                     failedCases = set()
@@ -368,6 +376,10 @@ def _main() -> None:
                      f'Related file: {path}\n') + '\n'.join(messages),
                     filename=path,
                     ci=args.ci)
+
+        if not foundInvalidInputs:
+            problems.warning(f'Missing invalid inputs for problem: {p.title}',
+                             ci=args.ci)
 
         logging.info(f'Results for {p.title}: {report["state"]}')
         logging.info(f'    Full logs and report in {problemResultsDirectory}')
