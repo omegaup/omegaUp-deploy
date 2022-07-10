@@ -101,20 +101,26 @@ def uploadProblemZip(client: omegaup.api.Client,
 
     if languages == 'all':
         payload['languages'] = ','.join((
-            'c11-gcc',
             'c11-clang',
-            'cpp11-gcc',
+            'c11-gcc',
             'cpp11-clang',
-            'cpp17-gcc',
+            'cpp11-gcc',
             'cpp17-clang',
+            'cpp17-gcc',
+            'cpp20-clang',
+            'cpp20-gcc',
             'cs',
+            'go',
             'hs',
             'java',
+            'js',
+            'kt',
             'lua',
             'pas',
             'py2',
             'py3',
             'rb',
+            'rs',
         ))
     elif languages == 'karel':
         payload['languages'] = 'kj,kp'
