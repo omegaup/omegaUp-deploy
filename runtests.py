@@ -348,6 +348,8 @@ def _main() -> None:
                             associatedFile = os.path.join(
                                 p.path, 'cases', f'{caseName}.in')
 
+                        expectedFailure = None
+
                         if testResult['type'] == 'invalid-inputs':
                             expectedFailurePath = os.path.join(
                                 p.path,
