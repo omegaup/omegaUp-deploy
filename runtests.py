@@ -342,25 +342,29 @@ def _main() -> None:
                         if caseName not in failedCases:
                             continue
 
-                        if testResult['type'] == 'solutions':
-                            associatedFile = testedFile
-                        else:
-                            associatedFile = os.path.join(
-                                p.path, 'cases', f'{caseName}.in')
-
                         expectedFailure = None
 
-                        if testResult['type'] == 'invalid-inputs':
+                        if testResult['type'] == 'solutions':
+                            associatedFile = testedFile
+                        elif testResult['type'] == 'inputs':
+                            associatedFile = os.path.join(
+                                p.path, 'cases', f'{caseName}.in')
+                        elif testResult['type'] == 'invalid-inputs':
+                            caseLocation = os.path.join(
+                                p.path,'tests', 'invalid-cases')
+                            associatedFile = os.path.join(
+                                caseLocation, f'{caseName}.in')
                             expectedFailurePath = os.path.join(
-                                p.path,
-                                'cases',
-                                f'{caseName}.expected-failure')
+                                caseLocation, f'{caseName}.expected-failure')
                             if not os.path.isfile(expectedFailurePath):
                                 logging.error('Missing file: ' +
                                               f'{expectedFailurePath}')
                             else:
                                 with open(expectedFailurePath, 'r') as err:
                                     expectedFailure = err.read().strip()
+                        else:
+                            logging.error('Unexpected test result type: '
+                                          f'{testResult["type"]}')
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
@@ -374,13 +378,15 @@ def _main() -> None:
                                 continue
 
                             failureMessage = (
-                                f'{stderrFilename}:'
-                                f'\n{textwrap.indent(contents, "    ")}')
+                                f'{stderrFilename}:\n'
+                                f'{textwrap.indent(contents, "    ")}')
 
                             if expectedFailure:
-                                failureMessage += (
-                                    '\nExpected the following string in'
-                                    f'stderr:\n {expectedFailure}')
+                                failureMessage = (
+                                    'Expected the following string in '
+                                    f'stderr:\n'
+                                    f'{textwrap.indent(expectedFailure, "    ")}\n\n' +
+                                    failureMessage)
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
