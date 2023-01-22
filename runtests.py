@@ -258,21 +258,20 @@ def _main() -> None:
                     # If there are no constraints, by default expect the run to
                     # be accepted.
                     expected['verdict'] = 'AC'
+            elif testResult['type'] == 'invalid-inputs':
+                testedFile = os.path.normpath(
+                    os.path.join(p.path,
+                                 'tests',
+                                 'invalid-inputs',
+                                 testResult['filename']))
+                expected = {'verdict': 'WA'}
+                foundInvalidInputs = True
             else:
-                if testResult['type'] == 'invalid-inputs':
-                    testedFile = os.path.normpath(
-                        os.path.join(p.path,
-                                     'tests',
-                                     'invalid-inputs',
-                                     testResult['filename']))
-                    expected = {'verdict': 'WA'}
-                    foundInvalidInputs = True
-                else:
-                    testedFile = os.path.normpath(
-                        os.path.join(p.path,
-                                     'cases',
-                                     testResult['filename']))
-                    expected = {'verdict': 'AC'}
+                testedFile = os.path.normpath(
+                    os.path.join(p.path,
+                                 'cases',
+                                 testResult['filename']))
+                expected = {'verdict': 'AC'}
 
             logsDirectory = os.path.join(problemResultsDirectory,
                                          str(testResult['index']))
@@ -343,11 +342,29 @@ def _main() -> None:
                         if caseName not in failedCases:
                             continue
 
+                        expectedFailure = None
+
                         if testResult['type'] == 'solutions':
                             associatedFile = testedFile
-                        else:
+                        elif testResult['type'] == 'inputs':
                             associatedFile = os.path.join(
                                 p.path, 'cases', f'{caseName}.in')
+                        elif testResult['type'] == 'invalid-inputs':
+                            caseLocation = os.path.join(
+                                p.path, 'tests', 'invalid-cases')
+                            associatedFile = os.path.join(
+                                caseLocation, f'{caseName}.in')
+                            expectedFailurePath = os.path.join(
+                                caseLocation, f'{caseName}.expected-failure')
+                            if not os.path.isfile(expectedFailurePath):
+                                logging.error('Missing file: ' +
+                                              f'{expectedFailurePath}')
+                            else:
+                                with open(expectedFailurePath, 'r') as err:
+                                    expectedFailure = err.read().strip()
+                        else:
+                            logging.error('Unexpected test result type: '
+                                          f'{testResult["type"]}')
 
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
@@ -361,8 +378,18 @@ def _main() -> None:
                                 continue
 
                             failureMessage = (
-                                f'{stderrFilename}:'
-                                f'\n{textwrap.indent(contents, "    ")}')
+                                f'{stderrFilename}:\n'
+                                f'{textwrap.indent(contents, "    ")}')
+
+                            if expectedFailure:
+                                formattedFailure = textwrap.indent(
+                                    expectedFailure, "    ")
+
+                                failureMessage = (
+                                    'Expected the following string in '
+                                    'stderr:\n'
+                                    f'{formattedFailure}\n\n'
+                                    f'{failureMessage}')
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
