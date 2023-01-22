@@ -258,21 +258,20 @@ def _main() -> None:
                     # If there are no constraints, by default expect the run to
                     # be accepted.
                     expected['verdict'] = 'AC'
+            elif testResult['type'] == 'invalid-inputs':
+                testedFile = os.path.normpath(
+                    os.path.join(p.path,
+                                 'tests',
+                                 'invalid-inputs',
+                                 testResult['filename']))
+                expected = {'verdict': 'WA'}
+                foundInvalidInputs = True
             else:
-                if testResult['type'] == 'invalid-inputs':
-                    testedFile = os.path.normpath(
-                        os.path.join(p.path,
-                                     'tests',
-                                     'invalid-inputs',
-                                     testResult['filename']))
-                    expected = {'verdict': 'WA'}
-                    foundInvalidInputs = True
-                else:
-                    testedFile = os.path.normpath(
-                        os.path.join(p.path,
-                                     'cases',
-                                     testResult['filename']))
-                    expected = {'verdict': 'AC'}
+                testedFile = os.path.normpath(
+                    os.path.join(p.path,
+                                 'cases',
+                                 testResult['filename']))
+                expected = {'verdict': 'AC'}
 
             logsDirectory = os.path.join(problemResultsDirectory,
                                          str(testResult['index']))
@@ -349,6 +348,15 @@ def _main() -> None:
                             associatedFile = os.path.join(
                                 p.path, 'cases', f'{caseName}.in')
 
+                        if testResult['type'] == 'invalid-inputs':
+                            expectedFailurePath = os.path.join(
+                                p.path, 'cases', f'{caseName}.expected-failure')
+                            if not os.path.file(expectedFailurePath):
+                                logging.error(f'Missing file: {expectedFailurePath}')
+                            else:
+                                with open(expectedFailurePath, 'r') as err:
+                                    expectedFailure = err.read().strip()
+
                         with open(os.path.join(logsDirectory, stderrFilename),
                                   'r') as out:
                             contents = out.read().strip()
@@ -363,6 +371,10 @@ def _main() -> None:
                             failureMessage = (
                                 f'{stderrFilename}:'
                                 f'\n{textwrap.indent(contents, "    ")}')
+
+                            if expectedFailure:
+                                failureMessage += '\nExpected the following string in stderr:\n'
+                                failureMessage += expectedFailure
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
