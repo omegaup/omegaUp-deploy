@@ -351,7 +351,7 @@ def _main() -> None:
                                 p.path, 'cases', f'{caseName}.in')
                         elif testResult['type'] == 'invalid-inputs':
                             caseLocation = os.path.join(
-                                p.path,'tests', 'invalid-cases')
+                                p.path, 'tests', 'invalid-cases')
                             associatedFile = os.path.join(
                                 caseLocation, f'{caseName}.in')
                             expectedFailurePath = os.path.join(
@@ -382,11 +382,14 @@ def _main() -> None:
                                 f'{textwrap.indent(contents, "    ")}')
 
                             if expectedFailure:
+                                formattedFailure = textwrap.indent(
+                                    expectedFailure, "    ")
+
                                 failureMessage = (
                                     'Expected the following string in '
-                                    f'stderr:\n'
-                                    f'{textwrap.indent(expectedFailure, "    ")}\n\n' +
-                                    failureMessage)
+                                    'stderr:\n'
+                                    f'{formattedFailure}\n\n'
+                                    f'{failureMessage}')
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
