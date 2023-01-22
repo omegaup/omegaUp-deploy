@@ -350,9 +350,12 @@ def _main() -> None:
 
                         if testResult['type'] == 'invalid-inputs':
                             expectedFailurePath = os.path.join(
-                                p.path, 'cases', f'{caseName}.expected-failure')
+                                p.path,
+                                'cases',
+                                f'{caseName}.expected-failure')
                             if not os.path.file(expectedFailurePath):
-                                logging.error(f'Missing file: {expectedFailurePath}')
+                                logging.error('Missing file: ' +
+                                              f'{expectedFailurePath}')
                             else:
                                 with open(expectedFailurePath, 'r') as err:
                                     expectedFailure = err.read().strip()
@@ -373,8 +376,9 @@ def _main() -> None:
                                 f'\n{textwrap.indent(contents, "    ")}')
 
                             if expectedFailure:
-                                failureMessage += '\nExpected the following string in stderr:\n'
-                                failureMessage += expectedFailure
+                                failureMessage += '\nExpected the following ' +
+                                                  'string in stderr:\n' +
+                                                  expectedFailure
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
