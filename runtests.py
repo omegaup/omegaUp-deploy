@@ -376,9 +376,9 @@ def _main() -> None:
                                 f'\n{textwrap.indent(contents, "    ")}')
 
                             if expectedFailure:
-                                failureMessage += ('\nExpected the following ' +
-                                                  'string in stderr:\n' +
-                                                  expectedFailure)
+                                failureMessage += (
+                                    '\nExpected the following string in'
+                                    f'stderr:\n {expectedFailure}')
 
                             failureMessages[associatedFile].append(
                                 failureMessage)
