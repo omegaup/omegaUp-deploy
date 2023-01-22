@@ -353,7 +353,7 @@ def _main() -> None:
                                 p.path,
                                 'cases',
                                 f'{caseName}.expected-failure')
-                            if not os.path.file(expectedFailurePath):
+                            if not os.path.isfile(expectedFailurePath):
                                 logging.error('Missing file: ' +
                                               f'{expectedFailurePath}')
                             else:
