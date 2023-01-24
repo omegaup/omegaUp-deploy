@@ -38,7 +38,8 @@ def getImageName(ci: bool) -> str:
         # This does not require authentication.
         imageName = 'omegaup/runner-ci'
 
-    taggedContainerName = f'{imageName}:v1.9.55'
+    taggedContainerName = f'{imageName}:v1.9.59'
+    taggedContainerName = 'omegaup/runner-ci:latest'
     if not subprocess.check_output(
         ['docker', 'image', 'ls', '-q', taggedContainerName],
             universal_newlines=True).strip():
