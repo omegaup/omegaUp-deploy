@@ -75,22 +75,14 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     if len(threadAffinityMapping) == 1:
         # No need to involve taskset. Just run the container normally.
         tasksetArgs = [
-            #'--entrypoint', 'strace',
             container.getImageName(ci),
-            #'-f',
-            #'-o/tmp/strace.txt',
-            #'--',
-            #'/usr/bin/omegaup-runner',
         ]
     else:
         # Mark the entrypoint as only being able to run in a single core.
         tasksetArgs = [
-            '--entrypoint', 'strace',
-            container.getImageName(ci),
-            '-f',
-            '-o/tmp/strace.txt',
-            '--',
+            '--entrypoint',
             '/usr/bin/taskset',
+            container.getImageName(ci),
             f'0x{2**threadAffinityMapping[threading.get_ident()]:x}',
             '/usr/bin/omegaup-runner',
         ]
@@ -98,7 +90,6 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     args = [
         'docker',
         'run',
-        '--name=ci',
         '--rm',
         '--volume',
         f'{rootDirectory}:/src',

@@ -39,7 +39,6 @@ def getImageName(ci: bool) -> str:
         imageName = 'omegaup/runner-ci'
 
     taggedContainerName = f'{imageName}:v1.9.59'
-    taggedContainerName = 'omegaup/runner-ci:latest'
     if not subprocess.check_output(
         ['docker', 'image', 'ls', '-q', taggedContainerName],
             universal_newlines=True).strip():
