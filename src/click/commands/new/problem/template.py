@@ -56,7 +56,7 @@ _insertar descripción del ejemplo aquí_
 
 - Subtarea _inserta número aquí_ (_insertar puntos aquí_ puntos): _inserta descripción aquí_
 
-""",
+"""  # noqa,
     },
     {
         "path": "cases/{sample}.in",

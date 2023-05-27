@@ -1,5 +1,3 @@
 from .new import new
 
-__all__ = [
-    "new",
-]
+__all__ = ["new"]

@@ -1,6 +1,7 @@
 import os
 import json
 
+
 def problems_json(repositoryRoot: str):
     with open(os.path.join(repositoryRoot, 'problems.json'), 'r') as p:
         config = json.load(p)

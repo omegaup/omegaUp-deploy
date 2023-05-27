@@ -23,7 +23,7 @@ class Problem(NamedTuple):
         return Problem(path=problemPath,
                        title=problemConfig['title'],
                        config=problemConfig)
-    
+
     @staticmethod
     def load_problems(
         rootDirectory: str,
@@ -36,11 +36,12 @@ class Problem(NamedTuple):
         configProblems: List[Problem] = []
         for problem in config['problems']:
             if excludeDisabled and problem.get('disabled', False):
-                logging.warning('Problem %s disabled. Skipping.', problem['title'])
+                logging.warning('Problem %s disabled. Skipping.',
+                                problem['title'])
                 continue
             configProblems.append(
                 Problem.load(problemPath=problem['path'],
-                         rootDirectory=rootDirectory))
+                             rootDirectory=rootDirectory))
         return configProblems
 
     def shouldGenerateOutputs(self, *, rootDirectory: str) -> bool:
@@ -160,7 +161,8 @@ def problems(allProblems: bool = False,
             for problemPath in problemPaths
         ]
 
-    configProblems = Problem.load_problems(rootDirectory=rootDirectory,excludeDisabled=True)
+    configProblems = Problem.load_problems(rootDirectory=rootDirectory,
+                                           excludeDisabled=True)
 
     if allProblems:
         logging.info('Loading everything as requested.')
