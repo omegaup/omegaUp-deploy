@@ -55,7 +55,6 @@ _insertar descripción del ejemplo aquí_
 # Subtareas
 
 - Subtarea _inserta número aquí_ (_insertar puntos aquí_ puntos): _inserta descripción aquí_
-
 """  # noqa,
     },
     {
@@ -70,7 +69,8 @@ _insertar descripción del ejemplo aquí_
         "path": "tests/tests.json",
         "content": """{{
   "max_score": 100
-}}""",
+}}
+""",
     },
     {
         "path": "testplan",

@@ -6,11 +6,11 @@ from src.click.commands.new import new
 
 
 @click.group()
-def ofmi_cli():
+def ofmi_cli() -> None:
     pass
 
 
-def _main():
+def _main() -> None:
     logging.basicConfig(format='%(asctime)s: %(message)s', level=logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
     ofmi_cli.add_command(new)

@@ -7,7 +7,7 @@ import os.path
 from types import TracebackType
 from typing import AnyStr, Iterator, IO, Optional, Type, Sequence
 
-import problems
+import src.problems as problems
 
 _LANGUAGE_MAPPING = {
     'cpp': 'cpp17-gcc',

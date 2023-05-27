@@ -26,7 +26,7 @@ def problem(
     source: str,
     sample: str,
     overwrite: bool,
-):
+) -> None:
     logging.info(f"Creating problem {path}...")
     if overwrite:
         logging.info("Overwriting existing files...")

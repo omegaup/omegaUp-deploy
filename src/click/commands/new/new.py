@@ -4,7 +4,7 @@ from src.click.commands.new.problem import problem
 
 
 @click.group()
-def new():
+def new() -> None:
     pass
 
 
