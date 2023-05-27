@@ -2,7 +2,6 @@
 import argparse
 import concurrent.futures
 import datetime
-import json
 import logging
 import os
 import re
@@ -11,8 +10,8 @@ import sys
 
 from typing import List, Optional
 
-import container
-import problems
+import src.container as container
+import src.problems as problems
 
 _SUPPORTED_GENERATORS = frozenset(('png', 'testplan'))
 

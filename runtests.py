@@ -16,8 +16,8 @@ import threading
 
 from typing import Any, DefaultDict, Dict, List, Mapping, Optional, Tuple
 
-import container
-import problems
+import src.container as container
+import src.problems as problems
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 

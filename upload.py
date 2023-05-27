@@ -10,7 +10,7 @@ import zipfile
 from typing import Any, Mapping, Set
 
 import omegaup.api
-import problems
+import src.problems as problems
 
 
 def createProblemZip(problemConfig: Mapping[str, Any], problemPath: str,

@@ -15,7 +15,7 @@ class Problem(NamedTuple):
 
     @staticmethod
     def load(problemPath: str, rootDirectory: str) -> 'Problem':
-        """Load a single proble from the path."""
+        """Load a single problem from the path."""
         with open(os.path.join(rootDirectory, problemPath,
                                'settings.json')) as f:
             problemConfig = json.load(f)
@@ -23,6 +23,25 @@ class Problem(NamedTuple):
         return Problem(path=problemPath,
                        title=problemConfig['title'],
                        config=problemConfig)
+    
+    @staticmethod
+    def load_problems(
+        rootDirectory: str,
+        excludeDisabled: bool = True,
+    ) -> List['Problem']:
+        """Load all problems from the root directory."""
+        with open(os.path.join(rootDirectory, 'problems.json'), 'r') as p:
+            config = json.load(p)
+
+        configProblems: List[Problem] = []
+        for problem in config['problems']:
+            if excludeDisabled and problem.get('disabled', False):
+                logging.warning('Problem %s disabled. Skipping.', problem['title'])
+                continue
+            configProblems.append(
+                Problem.load(problemPath=problem['path'],
+                         rootDirectory=rootDirectory))
+        return configProblems
 
     def shouldGenerateOutputs(self, *, rootDirectory: str) -> bool:
         """Returns whether the .out files should be generated for this problem.
@@ -141,17 +160,7 @@ def problems(allProblems: bool = False,
             for problemPath in problemPaths
         ]
 
-    with open(os.path.join(rootDirectory, 'problems.json'), 'r') as p:
-        config = json.load(p)
-
-    configProblems: List[Problem] = []
-    for problem in config['problems']:
-        if problem.get('disabled', False):
-            logging.warning('Problem %s disabled. Skipping.', problem['title'])
-            continue
-        configProblems.append(
-            Problem.load(problemPath=problem['path'],
-                         rootDirectory=rootDirectory))
+    configProblems = Problem.load_problems(rootDirectory=rootDirectory,excludeDisabled=True)
 
     if allProblems:
         logging.info('Loading everything as requested.')
