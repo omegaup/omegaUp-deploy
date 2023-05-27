@@ -13,3 +13,4 @@ def save_problems_json(repositoryRoot: str, config: Any) -> None:
     """Save the problems.json file."""
     with open(os.path.join(repositoryRoot, 'problems.json'), 'w') as p:
         json.dump(config, p, indent=2)
+        p.write('\n')
