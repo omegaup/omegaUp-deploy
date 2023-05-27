@@ -28,4 +28,63 @@ files = [
 }}
 """,
     },
+    {
+        "path": "statements/es.markdown",
+        "content": """_insertar descripción del problema aquí_
+
+# Entrada
+
+_inserta descripción de la entrada aquí_
+
+# Salida
+
+_inserta descripción de la salida aquí_
+
+# Ejemplo
+
+||examplefile
+{sample}
+||description
+_insertar descripción del ejemplo aquí_
+||end
+
+# Límites
+
+- _inserta límites de las variables aquí_
+
+# Subtareas
+
+- Subtarea _inserta número aquí_ (_insertar puntos aquí_ puntos): _inserta descripción aquí_
+
+""",
+    },
+    {
+        "path": "cases/{sample}.in",
+        "content": "",
+    },
+    {
+        "path": "cases/{sample}.out",
+        "content": "",
+    },
+    {
+        "path": "tests/tests.json",
+        "content": """{{
+  "max_score": 100
+}}""",
+    },
+    {
+        "path": "testplan",
+        "content": "{sample} 100\n",
+    }
+]
+
+symlinks = [
+    {
+        "src": "cases/{sample}.in",
+        "dst": "examples/{sample}.in",
+    },
+    {
+        "src": "cases/{sample}.out",
+        "dst": "examples/{sample}.out",
+    }
 ]
