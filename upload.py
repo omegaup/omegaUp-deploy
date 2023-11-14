@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import argparse
+import datetime
 import json
 import logging
 import os
@@ -57,9 +58,14 @@ def createProblemZip(problemConfig: Mapping[str, Any], problemPath: str,
             _recursiveAdd(directory)
 
 
-def uploadProblemZip(client: omegaup.api.Client,
-                     problemConfig: Mapping[str, Any], canCreate: bool,
-                     zipPath: str, commitMessage: str) -> None:
+def uploadProblemZip(
+    client: omegaup.api.Client,
+    problemConfig: Mapping[str, Any],
+    canCreate: bool,
+    zipPath: str,
+    commitMessage: str,
+    timeout: datetime.timedelta,
+) -> None:
     """Uploads a problem with the given .zip and configuration."""
     misc = problemConfig['misc']
     alias = misc['alias']
@@ -129,7 +135,7 @@ def uploadProblemZip(client: omegaup.api.Client,
 
     files = {'problem_contents': open(zipPath, 'rb')}
 
-    client.query(endpoint, payload, files)
+    client.query(endpoint, payload, files, timeout)
 
     targetAdmins = misc.get('admins', [])
     targetAdminGroups = misc.get('admin-groups', [])
@@ -203,8 +209,13 @@ def uploadProblemZip(client: omegaup.api.Client,
                                   public=payload.get('public', False))
 
 
-def uploadProblem(client: omegaup.api.Client, problemPath: str,
-                  commitMessage: str, canCreate: bool) -> None:
+def uploadProblem(
+    client: omegaup.api.Client,
+    problemPath: str,
+    commitMessage: str,
+    canCreate: bool,
+    timeout: datetime.timedelta,
+) -> None:
     with open(os.path.join(problemPath, 'settings.json'), 'r') as f:
         problemConfig = json.load(f)
 
@@ -217,7 +228,8 @@ def uploadProblem(client: omegaup.api.Client, problemPath: str,
                          problemConfig,
                          canCreate,
                          tempFile.name,
-                         commitMessage=commitMessage)
+                         commitMessage=commitMessage,
+                         timeout=timeout)
 
         logging.info('Success uploading %s', problemConfig['title'])
 
@@ -259,6 +271,10 @@ def _main() -> None:
                         action='store_true',
                         help=("Whether it's allowable to create the "
                               "problem if it does not exist."))
+    parser.add_argument("--timeout",
+                        type=int,
+                        default=60,
+                        help="Timeout for deploy API call (in seconds)")
     parser.add_argument('problem_paths',
                         metavar='PROBLEM',
                         type=str,
@@ -289,7 +305,8 @@ def _main() -> None:
             client,
             os.path.join(rootDirectory, problem.path),
             commitMessage=f'Deployed automatically from commit {commit}',
-            canCreate=args.can_create)
+            canCreate=args.can_create,
+            timeout=datetime.timedelta(seconds=args.timeout))
 
 
 if __name__ == '__main__':
