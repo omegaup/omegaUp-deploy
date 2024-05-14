@@ -1,10 +1,11 @@
 import logging
 import os
 import sys
-import subprocess
 import json
 
 from typing import Any, List, Mapping, NamedTuple, NoReturn, Optional, Sequence
+
+import repository
 
 
 class Problem(NamedTuple):
@@ -15,7 +16,7 @@ class Problem(NamedTuple):
 
     @staticmethod
     def load(problemPath: str, rootDirectory: str) -> 'Problem':
-        """Load a single proble from the path."""
+        """Load a single problem from the path."""
         with open(os.path.join(rootDirectory, problemPath,
                                'settings.json')) as f:
             problemConfig = json.load(f)
@@ -38,18 +39,6 @@ class Problem(NamedTuple):
                 if line.strip() == '**/*.out':
                     return True
         return False
-
-
-def repositoryRoot() -> str:
-    """Returns the root directory of the project.
-
-    If this is a submodule, it gets the root of the top-level working tree.
-    """
-    return subprocess.check_output([
-        'git', 'rev-parse', '--show-superproject-working-tree',
-        '--show-toplevel'
-    ],
-                                   universal_newlines=True).strip().split()[0]
 
 
 def enumerateFullPath(path: str) -> List[str]:
@@ -126,9 +115,8 @@ def problems(allProblems: bool = False,
     `problems.json` will be returned. Otherwise, only those that have
     differences with `upstream/main`.
     """
-    env = os.environ
     if rootDirectory is None:
-        rootDirectory = repositoryRoot()
+        rootDirectory = repository.repositoryRoot()
 
     logging.info('Loading problems...')
 
@@ -157,21 +145,7 @@ def problems(allProblems: bool = False,
         logging.info('Loading everything as requested.')
         return configProblems
 
-    logging.info('Loading git diff.')
-
-    if env.get('TRAVIS_COMMIT_RANGE'):
-        commitRange = env['TRAVIS_COMMIT_RANGE']
-    elif env.get('CIRCLE_COMPARE_URL'):
-        commitRange = env['CIRCLE_COMPARE_URL'].split('/')[6]
-    elif env.get('GITHUB_BASE_COMMIT'):
-        commitRange = env['GITHUB_BASE_COMMIT'] + '...HEAD'
-    else:
-        commitRange = 'origin/main...HEAD'
-
-    changes = subprocess.check_output(
-        ['git', 'diff', '--name-only', '--diff-filter=AMDR', commitRange],
-        cwd=rootDirectory,
-        universal_newlines=True)
+    changes = repository.gitDiff(rootDirectory)
 
     problems: List[Problem] = []
     for problem in configProblems:
