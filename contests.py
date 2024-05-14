@@ -55,8 +55,8 @@ def contests(allContests: bool = False,
         # anyways, since it's read from the configuration file in the contest
         # directory for anything important.
         return [
-            Contest.load(contestPath=problemPath, rootDirectory=rootDirectory)
-            for problemPath in contestPaths
+            Contest.load(contestPath=contestPath, rootDirectory=rootDirectory)
+            for contestPath in contestPaths
         ]
 
     with open(os.path.join(rootDirectory, 'problems.json'), 'r') as p:
