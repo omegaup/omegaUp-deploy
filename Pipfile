@@ -6,6 +6,7 @@ name = "pypi"
 [dev-packages]
 mypy = ">=0.782"
 pycodestyle = ">=2.6.0"
+types-PyYAML = ">=6.0.12.20"
 
 [packages]
 libkarel = ">=1.0.2"
