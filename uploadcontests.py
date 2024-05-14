@@ -13,21 +13,16 @@ def _main() -> None:
     env = os.environ
 
     parser = argparse.ArgumentParser(description="Upsert contests to OmegaUp")
-    parser.add_argument(
-        '--cli',
-        action='store_true',
-        help='Signal that the script is being run from the CLI',
-    )
+    parser.add_argument('--ci',
+                        action='store_true',
+                        help='Signal that this is being run from the CI.')
     parser.add_argument(
         '--all',
         action='store_true',
-        help='Upsert all contests, instead of only those that have changed',
-    )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Verb',
-    )
+        help='Upsert all contests, instead of only those that have changed')
+    parser.add_argument('--verbose',
+                        action='store_true',
+                        help='Verbose logging')
     parser.add_argument('--url',
                         default='https://omegaup.com',
                         help='URL of the omegaUp host.')
