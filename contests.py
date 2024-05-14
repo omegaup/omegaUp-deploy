@@ -224,7 +224,8 @@ def upsertContest(
         client.contest.removeGroupAdmin(contest_alias=alias, group=group)
 
     # Adding problems
-    targetProblems: Sequence[Dict] = contestConfig.get('problems', [])
+    targetProblems: Sequence[Dict[str,
+                                  Any]] = contestConfig.get('problems', [])
 
     allProblems = client.contest.problems(contest_alias=alias)
     problems = {
@@ -307,4 +308,4 @@ def upsertContest(
         logging.info('Removing contestant group: %s', group)
         client.contest.removeGroup(contest_alias=alias, group=group)
 
-    logging.info("Sucessfully upserted contest %s", title)
+    logging.info("Successfully upserted contest %s", title)
