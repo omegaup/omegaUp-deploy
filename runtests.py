@@ -18,6 +18,7 @@ from typing import Any, DefaultDict, Dict, List, Mapping, Optional, Tuple
 
 import container
 import problems
+import repository
 
 TestResult = Tuple[problems.Problem, Mapping[str, Any]]
 
@@ -138,7 +139,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
 
 
 def _main() -> None:
-    rootDirectory = problems.repositoryRoot()
+    rootDirectory = repository.repositoryRoot()
 
     parser = argparse.ArgumentParser('Run tests')
     parser.add_argument('--ci',

@@ -12,6 +12,7 @@ from typing import Any, Mapping, Set
 
 import omegaup.api
 import problems
+import repository
 
 
 def createProblemZip(problemConfig: Mapping[str, Any], problemPath: str,
@@ -296,7 +297,7 @@ def _main() -> None:
         commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                          universal_newlines=True).strip()
 
-    rootDirectory = problems.repositoryRoot()
+    rootDirectory = repository.repositoryRoot()
 
     for problem in problems.problems(allProblems=args.all,
                                      rootDirectory=rootDirectory,

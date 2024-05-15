@@ -2,7 +2,6 @@
 import argparse
 import concurrent.futures
 import datetime
-import json
 import logging
 import os
 import re
@@ -13,6 +12,7 @@ from typing import List, Optional
 
 import container
 import problems
+import repository
 
 _SUPPORTED_GENERATORS = frozenset(('png', 'testplan'))
 
@@ -200,7 +200,7 @@ def _main() -> None:
                         level=logging.DEBUG if args.verbose else logging.INFO)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
-    rootDirectory = problems.repositoryRoot()
+    rootDirectory = repository.repositoryRoot()
 
     with concurrent.futures.ThreadPoolExecutor(
             max_workers=args.jobs) as executor:
