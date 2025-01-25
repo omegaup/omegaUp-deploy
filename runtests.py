@@ -58,12 +58,17 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
     # necessarily match the caller's UID. To avoid that problem, we create
     # the results directory with very lax permissions so that the container
     # can write it.
+    logging.info("===== ya hice el dir outputs ", problemOutputsDirectory)
     os.chmod(problemResultsDirectory, 0o777)
+    logging.info("====== ya le hice chmod a results ", problemResultsDirectory)
     os.chmod(problemOutputsDirectory, 0o777)
+    logging.info("====== ya le hice chmod a outputs")
     with open(os.path.join(problemResultsDirectory, 'ci.log'), 'w') as f:
+        logging.info("====== ya creé carpeta de logs ci.log")
         pass
     # Also make the ci log's permissions very lax.
     os.chmod(os.path.join(problemResultsDirectory, 'ci.log'), 0o666)
+    logging.info("==== =ya le hice chmod a ci.logs")
 
     if p.shouldGenerateOutputs(rootDirectory=rootDirectory):
         outputsArgs = [
@@ -72,13 +77,17 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
         ]
     else:
         outputsArgs = []
+    logging.info("===== ya populé outputsArgs ", outputsArgs)
 
     if len(threadAffinityMapping) == 1:
+        logging.info("===== ya entré al if de tasksetArgs")
         # No need to involve taskset. Just run the container normally.
         tasksetArgs = [
             container.getImageName(ci),
         ]
+        logging.info("===== ya terminé en el if de tasksetArgs")
     else:
+        logging.info("===== ya entré al else de tasksetArgs")
         # Mark the entrypoint as only being able to run in a single core.
         tasksetArgs = [
             '--entrypoint',
@@ -87,6 +96,10 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
             f'0x{2**threadAffinityMapping[threading.get_ident()]:x}',
             '/usr/bin/omegaup-runner',
         ]
+        logging.info("===== ya terminé en el else de tasksetArgs")
+
+    logging.info("===== ya populé tasksetArgs ", tasksetArgs)
+
 
     args = [
         'docker',
