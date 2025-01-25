@@ -115,7 +115,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
         os.path.relpath(problemResultsDirectory, rootDirectory),
     ] + outputsArgs
 
-    logging.debug('[%2d] %-30s: Running `%s`...',
+    logging.info('[%2d] %-30s: Running `%s`...',
                   threadAffinityMapping[threading.get_ident()], p.title,
                   shlex.join(args))
     processResult = subprocess.run(args,
