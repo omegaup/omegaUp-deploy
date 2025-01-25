@@ -123,6 +123,7 @@ def _testProblem(p: problems.Problem, *, threadAffinityMapping: Dict[int, int],
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    cwd=rootDirectory)
+    logging.info("========= ya salí del processResult ", processResult)
 
     if processResult.returncode != 0:
         problems.error(f'Failed to run {p.title}:\n{processResult.stderr}',
